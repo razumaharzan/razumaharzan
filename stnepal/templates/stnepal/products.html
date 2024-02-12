@@ -1,0 +1,49 @@
+
+{% extends 'stnepal/index.html' %}
+
+{% block content %}
+    {% if messages %}
+        {% for message in messages %}
+            {% if message.tags == 'success' %}
+                <div class="alert alert-success" role="alert">
+                    Data saved successfully!
+                </div>
+            {% else %}
+                <div class="alert alert-danger" role="alert">
+                    Data deleted successfully!
+                </div>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+<table class="table table-striped table-bordered table-hover table-condensed">
+    <thead>
+      <tr>
+        <th scope="col">S.N.</th>
+        <th scope="col">name</th>
+        <th scope="col">Email</th>
+        <th scope="col">Password</th>
+        <th scope="col">Phone</th>
+        <th scope="col">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+        {% for data in datas %}
+            <tr>
+                <th scope="row">{{forloop.counter}}</th>
+                <td>{{data.name}}</td>
+                <td>{{data.email}}</td>
+                <td>{{data.password}}</td>
+                <td>{{data.phone}}</td>
+                <td>
+                  <a href = "{% url 'edit_item' data.id %}" class="btn btn-info btn-sm">Edit</a>
+                    <form class = "d-inline" method="POST" action="{% url 'delete' data.id %}">
+                        {% csrf_token %}
+                        <input type="submit" class="btn btn-danger btn-sm" value="Delete">
+                    </form>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock content %}

@@ -1,0 +1,103 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Our Page</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+    <!-- Favicon -->
+    <link href="img/favicon.ico" rel="icon">
+
+    <!-- Google Fonts -->
+    <link href="{% static 'stnepal/css/plugin/google.font.family.min.css' %}" rel="stylesheet">
+    <!-- CSS Libraries -->
+    <link href="{% static 'stnepal/css/plugin/bootstrap.min.css' %}" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="{% static 'stnepal/css/plugin/toaster.css' %}">
+    <link rel="stylesheet" href="{% static 'stnepal/css/fontawesome-free/css/all.min.css' %}">
+    <link rel="stylesheet" href="{% static 'stnepal/css/plugin/adminlte.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'stnepal/css/index.css' %}">
+
+    <!-- Template Stylesheet -->
+    <!-- <link href="css/style.css" rel="stylesheet"> -->
+    {% block css %}
+    {% endblock css %}
+
+</head>
+
+  <body style="height: auto;margin: 9px;">
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Navbar</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                  <a class="nav-link active" aria-current="page" href="{% url 'home' %}">Home</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link active" aria-current="page" href="{% url 'products' %}">Products</a>
+                </li>
+                
+                <li class="nav-item">
+                  <a class="nav-link active" aria-current="page" href="{% url 'sec_support' %}">Support</a>
+                </li> 
+                <li class="nav-item">
+                  <a class="nav-link active" aria-current="page" href="{% url 'sec_solutions' %}">Solutions</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link active" aria-current="page" href="{% url 'logout' %}">Logout</a>
+                </li>
+              </ul>
+              <form class="d-flex" role="search">
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-success" type="submit">Search</button>
+              </form>
+            </div>
+        </div>
+      </nav>
+      {% block content %}
+      <div class="jumbotron text-center">
+        <h1 class="display-4">Welcome to Secure Tech Nepal.</h1>
+        <p class="lead">for your security.</p>
+        <hr class="my-4">
+        <p>A Complete Home And Business Security Solutions.</p>
+        <a class="btn btn-lg btn-custom" href="#" role="button">Learn more</a>
+      </div>
+    
+      <div class="container">
+        <div class="row">
+          <div class="col-md-4">
+            <h2>Heading 1</h2>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero.</p>
+          </div>
+          <div class="col-md-4">
+            <h2>Heading 2</h2>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero.</p>
+          </div>
+          <div class="col-md-4">
+            <h2>Heading 3</h2>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero.</p>
+          </div>
+        </div>
+      </div>
+    
+      {% endblock content %}
+      
+    <!-- REQUIRED SCRIPTS -->
+    <!-- jQuery -->
+    <script src="{% static 'stnepal/js/plugin/jquery.min.js' %}"></script>
+    <!-- Bootstrap 4 -->
+    <script src="{% static 'stnepal/css/plugin/toaster.css' %}"></script>
+    <script src="{% static 'stnepal/js/plugin/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'stnepal/js/plugin/toaster.min.js' %}"></script>
+    <script src="{% static 'stnepal/js/plugin/adminlte.min.js' %}"></script>
+  
+    
+    {% block script %}
+    {% endblock script %}
+
+</html>

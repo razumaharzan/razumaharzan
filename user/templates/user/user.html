@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+
+{% load static %}
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Onlie Shopping | Log in</title>
+    <link href="{% static 'stnepal/css/plugin/google.font.family.min.css' %}" rel="stylesheet">
+    <!-- CSS Libraries -->
+    <link href="{% static 'stnepal/css/plugin/bootstrap.min.css' %}" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="{% static 'stnepal/css/fontawesome-free/css/all.min.css' %}">
+    <link rel="stylesheet" href="{% static 'stnepal/css/plugin/adminlte.min.css' %}" />
+</head>
+
+
+<body class="hold-transition login-page">
+    <div class="login-box">
+        <div class="login-logo">
+            <a hef="">Online Shopping</a>
+        </div>
+        <div class="card">
+            <div class="card-body login-card-body">
+                <p class="login-box-msg">Sign in to start your session</p>
+                <form id="userForm" method="POST" >
+                    {% csrf_token %}
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" placeholder="username" name="username">
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fa fa-user"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-group mb-3">
+                        <input type="password" class="form-control" placeholder="Password" name="password">
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-lock"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="icheck-primary">
+                                <input type="checkbox" id="remember">
+                                <label for="remember">
+                                    Remember Me
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <input type="submit" class="btn btn-primary btn-block" value="Sign In" id="loginBtn">
+                        </div>
+                    </div>
+                </form>
+                <div>
+                    <p class="mb-1">
+                        <a href="#" id="forgotPassword">Forgot password</a>
+                    </p>
+                    <p class="mb-0">
+                        <a href="{% url 'register' %}" class="text-center">Register</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- REQUIRED SCRIPTS -->
+
+    <!-- jQuery -->
+    <script src="{% static 'stnpal/js/plugin/jquery.min.js' %}"></script>
+    <!-- jquery form validator -->
+    <script src="{% static 'stnpal/js/plugin/jquery.validator.min.js' %}"></script>
+
+    <script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.11.1/jquery.validate.min.js"></script>
+
+    <!-- toaster plugin -->
+    <script src="{% static 'stnpal/js/plugin/toaster.min.js' %}"></script>
+    <!-- Bootstrap 4 -->
+    <script src="{% static 'stnpal/js/plugin/bootstrap.bundle.min.js' %}"></script>
+    <!-- toaster CSS only -->
+    <link rel="stylesheet" href="{% static 'stnpal/css/plugin/toaster.css' %}" />
+    <!-- AdminLTE App -->
+    <script src="{% static 'stnpal/js/plugin/adminlto.min.js' %}"></script>
+    <!--custom js file -->
+</body>
+</html>

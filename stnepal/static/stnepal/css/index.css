@@ -1,0 +1,32 @@
+body {
+    background-color: #f8f9fa;
+  }
+  .navbar {
+    background-color: #563d7c;
+  }
+  .navbar-brand {
+    color: #f8f9fa;
+    /* font-size: 24px; */
+  }
+  .navbar-nav .nav-link {
+    color: #f8f9fa;
+  }
+
+   .jumbotron {
+    background-color: #563d7c;
+    color: #fff;
+  }
+
+  .btn-custom {
+    background-color: #dc3545;
+    border-color: #dc3545;
+  }
+  .btn-custom:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+  }
+
+  .col-md-4{
+    background-color: darkgrey;
+  }
+  

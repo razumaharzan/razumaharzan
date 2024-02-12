@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>sss</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+    <!-- Favicon -->
+    <link href="img/favicon.ico" rel="icon">
+
+    <!-- Google Fonts -->
+    <link href="{% static 'jango_class/css/plugin/google.font.family.min.css' %}" rel="stylesheet">
+    <!-- CSS Libraries -->
+    <link href="{% static 'jango_class/css/plugin/bootstrap.min.css' %}" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="{% static 'jango_class/css/fontawesome-free/css/all.min.css' %}">
+    <link rel="stylesheet" href="{% static 'jango_class/css/plugin/adminlte.min.css' %}" />
+
+    <!-- Template Stylesheet -->
+    <!-- <link href="css/style.css" rel="stylesheet"> -->
+    {% block css %}
+    {% endblock css %}
+
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="#">Secre Tech Nepal</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{% url 'home' %}">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{% url 'products' %}">Products</a>
+              </li>
+              
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{% url 'sec_support' %}">Support</a>
+              </li>
+
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{% url 'sec_solutions' %}">Solutions</a>
+              </li>
+            </ul>
+            <form class="d-flex" role="search">
+              <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+              <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>
+          </div>
+        </div>
+      </nav>
+    {% block content %}
+
+    {% endblock content %}
+
+    <!-- REQUIRED SCRIPTS -->
+    <!-- jQuery -->
+    <script src="{% static 'jango_class/js/plugin/jquery.min.js' %}"></script>
+    <!-- Bootstrap 4 -->
+    <script src="{% static 'jango_class/js/plugin/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'jango_class/js/plugin/adminlte.min.js' %}"></script>
+    
+    {% block script %}
+    {% endblock script %}
+
+</body>
+
+</html>

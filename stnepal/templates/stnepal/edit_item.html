@@ -1,0 +1,100 @@
+{% extends 'stnepal/index.html' %}
+
+{% block content %}
+
+<form id="edit_information">
+{% csrf_token %}
+    <div class="row">
+        <div class="col-md-3">
+            <div class="from-group">
+                <label for="name">Name:</label><br>
+                <input type="text" id="name" value="{{securetech.name}}" required><br>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3">
+            <div class="from-group">
+                <label for="email">Email:</label><br>
+                <input type="Email" id="email" re value="{{securetech.email}}"quired><br>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3">
+            <div class="from-group">
+                <label for="password">Password:</label><br>
+                <input type="password" id="password" value="{{securetech.password}}" required><br>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3">
+            <div class="from-group">
+                <label for="phone">phone:</label><br>
+                <input type="text" id="phone" value="{{securetech.phone}}" required><br>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3">
+            <div class="from-group">
+                <input type="button" value="Edit" class="btn btn-info" id="Login">
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+    {% block script %}
+    <script>
+        // to get data
+        $("#Login").off('click').on('click',function(){
+            var data = {
+                "username":$("#name").val(),
+                "email":$("#email").val(),
+                "password":$("#password").val(),
+                "phone":$("#phone").val(),
+            }
+                // to pass dat in to views by using in ajax
+            console.log(data)
+            var token = $("#edit_information").find("input[name=csrfmiddlewaretoken]").val(); // to get csrf_token
+            var id = "{{securetech.id}}"
+            $.ajax({
+                method: "POST", //what method
+                url: `/edit/${id}`, //where to send
+                headers: { "X-CSRFToken": token },
+                data: JSON.stringify(data), // what to send
+                contentType: "application/json",
+                dataType: "json",
+            
+                success: function(response) {
+                    toastr.success("Data edit successfully")
+                    window.setTimeout(function() {
+                        window.location = "/products";
+                    }, 2000);
+                },
+                error: function(response) {
+                    data = response.responseJSON;
+            if (data === undefined) {
+                toastr.error("Internal server error.")
+            }
+            else {
+                if (data.hasOwnProperty('error')) {
+                    var li = ''
+                    for (let i = 0; i < data['error'].length; i++) {
+                        li += '<li>' + data['error'][i] + '</li>'
+                    }
+                    toastr.error(li)
+                }
+                else {
+                    li = '<li>' + data['resultDescription'] + '</li>'
+                    toastr.error(li)
+                }
+            }
+    
+                },
+                });
+        })
+        
+    </script>
+{% endblock script %}

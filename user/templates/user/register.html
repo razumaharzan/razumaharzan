@@ -1,0 +1,78 @@
+{% block content %}
+<!DOCTYPE html>
+{% load static %}
+<html>
+
+<head>
+    <link href="{% static 'stnepal/css/plugin/google.font.family.min.css' %}" rel="stylesheet">
+    <!-- CSS Libraries -->
+    <link href="{% static 'stnepal/css/plugin/bootstrap.min.css' %}" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="{% static 'stnepal/css/fontawesome-free/css/all.min.css' %}">
+    <link rel="stylesheet" href="{% static 'stnepal/css/plugin/adminlte.min.css' %}" />
+
+</head>
+
+<body>
+
+    <section class="vh-100 bg-image"
+        style="background-image: url('https://mdbcdn.b-cdn.net/img/Photos/new-templates/search-box/img4.webp');">
+        <div class="mask d-flex align-items-center h-100 gradient-custom-3">
+            <div class="container h-100">
+                <div class="row d-flex justify-content-center align-items-center h-100">
+                    <div class="col-12 col-md-9 col-lg-7 col-xl-6">
+                        <div class="card" style="border-radius: 15px;">
+                            <div class="card-body p-5">
+                                <h2 class="text-uppercase text-center mb-5">Create an account First</h2>
+                                <form id="userRegister" action="/register" method = "POST">
+                                    {% csrf_token %}
+                                    <div class="form-outline mb-4">
+                                        <label class="form-label" for="username">User Name:</label>
+                                        <input type="text" id="username" class="form-control input-sm"
+                                            name="username" />
+                                    </div>
+
+                                    <div class="form-outline mb-4">
+                                        <label class="form-label" for="email">Email:</label>
+                                        <input type="email" id="email" class="form-control input-sm" name="email" />
+                                    </div>
+
+                                    <div class="form-outline mb-4">
+                                        <label class="form-label" for="password">Password</label>
+                                        <input type="password" id="password" class="form-control input-sm"
+                                            name="password" />
+                                    </div>
+
+                                    <div class="form-outline mb-4">
+                                        <label class="form-label" for="cPassword">password(again):</label>
+                                        <input type="password" id="cPassword" class="form-control input-sm"
+                                            name="cPassword" />
+                                    </div>
+                                    <div class="d-flex justify-content-center">
+                                        <input type="submit" value="Register" id="signUpBtn"
+                                            class="btn btn-success btn-block btn-lg gradient-custom-4 text-body">
+                                    </div>
+                                    <p class="text-center text-muted mt-5 mb-0">Have already an account? 
+                                        <a href="{% url 'login' %}" class="fw-bold text-body"><u>Login here</u></a></p>
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+<script src="{% static 'js/plugin/jquery.min.js' %}"></script>
+<script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.11.1/jquery.validate.min.js"></script>
+<script src="{% static 'js/plugin/toaster.min.js' %}"></script>
+<!-- Bootstrap 4 -->
+<script src="{% static 'js/plugin/bootstrap.bundle.min.js' %}"></script>
+<!--signup js file-->
+<script src="{% static 'js/plugin/project_js/custom.js' %}"></script>
+
+<script src="{% static 'js/plugin/project_js/user_signup.js' %}"></script>
+
+</html>
+{% endblock content %}

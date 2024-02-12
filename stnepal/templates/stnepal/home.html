@@ -1,0 +1,100 @@
+{% extends 'stnepal/index.html' %}
+
+{% block content %}
+
+<form id="information">
+{% csrf_token %}
+    <div class="row">
+        <div class="col-md-3">
+            <div class="from-group">
+                <label for="name">Username:</label><br>
+                <input type="text" id = "name" class="form-control" required>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="from-group">
+                <label for="email">Email:</label><br>
+                <input type="Email" id = "email" class="form-control" required>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="from-group">
+                <label for="password">Password:</label><br>
+                <input type="password" id = "password" class="form-control" required>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="from-group">
+                <label for="phone">phone:</label><br>
+                <input type="text" id = "phone" class="form-control" maxlength="10" required>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="from-group">
+                <input type="button" value="Submit" id ="submitBtn"  class="btn btn-info mt-2"><br>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock content %}
+
+{% block script %}
+<script>
+    // to get data
+    $("#submitBtn").off('click').on('click',function(){
+        var data = {
+            "username":$("#name").val(),
+            "email":$("#email").val(),
+            "password":$("#password").val(),
+            "phone":$("#phone").val(),
+        }
+            // to pass dat in to views by using in ajax
+        console.log(data)
+        var token = $("#information").find("input[name=csrfmiddlewaretoken]").val(); // to get csrf_token
+        $.ajax({
+            method: "POST", //what method
+            url: "/home/", //where to send
+            headers: { "X-CSRFToken": token },
+            data: JSON.stringify(data), // what to send
+            contentType: "application/json",
+            dataType: "json",
+        
+            success: function(response) {
+                window.setTimeout(function () {
+                    window.location = "/home/";
+                }, 1000);
+            },
+            error: function (response) {
+                data = response.responseJSON
+                let values = Object.values(data['message'])
+                li =''
+                for (let i=0; i<values.length; i++){
+                    var result = values[i]
+                    for (let j=0; j<result.length; j++){
+                          li+= <li>${result[j]}</li>
+                    }
+                }
+                toastr.error(li)
+            else {
+                if (data.hasOwnProperty('error')) {
+                    var li = ''
+                    for (let i = 0; i < data['error'].length; i++) {
+                        li += '<li>' + data['error'][i] + '</li>'
+                    }
+                    toastr.error(li)
+                }
+                else {
+                    li = '<li>' + data['resultDescription'] + '</li>'
+                    toastr.error(li)
+                }
+            }
+
+            },
+            });
+    })
+    
+</script>
+
+
+
+{% endblock script %}
