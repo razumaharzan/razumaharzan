@@ -50,7 +50,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Initialize Session Storage Frameworks
+# Initialize Data Storage Tables
 if "expenses" not in st.session_state:
     st.session_state.expenses = pd.DataFrame(columns=["date", "shop", "items", "amount", "payment_method", "main_category", "sub_category"])
 
@@ -130,6 +130,9 @@ else:
             e_method = st.selectbox("Execution Channel", ["QR Payment", "E-Wallet Transfer", "Cash Settlement", "Bank Cheque"])
             
             main_cat = st.selectbox("Primary Category", ["Food & Dining", "Logistics & Transport", "Subscriptions", "Medical/Health", "Groceries"])
+            
+            # Simplified static selections to avoid nested branches
+            sub_cat = "General"
             if main_cat == "Food & Dining":
                 sub_cat = st.selectbox("Sub-Allocation", ["Tea", "Coffee", "Breakfast", "Lunch", "Dinner"])
             elif main_cat == "Logistics & Transport":
@@ -138,7 +141,7 @@ else:
                 sub_cat = st.selectbox("Sub-Allocation", ["Netflix", "Internet Access", "Software Tools", "Gym Membership"])
             elif main_cat == "Medical/Health":
                 sub_cat = st.selectbox("Sub-Allocation", ["Medicine Purchase", "Hospital Checkup", "Doctor Consultation"])
-            else:
+            elif main_cat == "Groceries":
                 sub_cat = st.selectbox("Sub-Allocation", ["Kitchen Supplies", "Vegetables", "Fresh Meat", "Toiletries"])
                 
             if st.button("Execute Ledger Log", type="primary", use_container_width=True):
@@ -184,5 +187,5 @@ else:
         with ct1:
             st.markdown('<p class="metric-lbl" style="color:#ef4444;">⚡ Active Tasks Pipeline</p>', unsafe_allow_html=True)
             p_tasks = st.session_state.tasks[st.session_state.tasks["status"] == "Pending"]
+            
             if not p_tasks.empty:
-                for idx, r in p_tasks.iterrows():
