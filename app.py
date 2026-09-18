@@ -66,50 +66,45 @@ if st.session_state.current_user is None:
     st.title("💼 Mero App")
     st.subheader("Your Personal Expense, Work & Family Dashboard")
     
-    # Toggle switch between Log In and Sign Up modes
     gate_mode = st.radio("Choose Action", ["Log In to My Account", "Register New Family Member (Sign Up)"], horizontal=True)
     st.write("---")
     
-    col_l1, col_l2, col_l3 = st.columns([1, 1.2, 1])
-    
-    with col_l2:
-        if gate_mode == "Log In to My Account":
-            # Native Streamlit Form enables pressing 'Enter' on keyboard to execute submit action automatically
-            with st.form("login_form", clear_on_submit=False):
-                st.markdown("### 🔒 Secure Access Portal")
-                login_email = st.text_input("Gmail Address")
-                login_pass = st.text_input("Password", type="password")
-                submit_login = st.form_submit_button("Log In", type="primary", use_container_width=True)
-                
-                if submit_login:
-                    db = st.session_state.user_db
-                    user_match = db[(db["email"] == login_email) & (db["password"] == login_pass)]
-                    if not user_match.empty:
-                        st.session_state.current_user = login_email
-                        st.session_state.current_role = user_match.iloc[0]["role"]
-                        st.session_state.current_name = user_match.iloc[0]["name"]
-                        st.success("Authorized.")
-                        st.rerun()
-                    else:
-                        st.error("Invalid email address or password sequence.")
-                        
-        elif gate_mode == "Register New Family Member (Sign Up)":
-            with st.form("signup_form", clear_on_submit=True):
-                st.markdown("### 📝 Family Registration Form")
-                new_name = st.text_input("Full Name", placeholder="e.g. Sita Maharjan")
-                new_email = st.text_input("Gmail Address", placeholder="username@gmail.com")
-                new_pass = st.text_input("Create Security Password", type="password")
-                submit_signup = st.form_submit_button("Create Account & Register", type="primary", use_container_width=True)
-                
-                if submit_signup:
-                    if new_name.strip() == "" or new_email.strip() == "" or new_pass.strip() == "":
-                        st.error("All entry fields are mandatory to complete user registration profiles.")
-                    elif new_email in st.session_state.user_db["email"].values:
-                        st.error("This email address is already registered inside Mero App database.")
-                    else:
-                        new_profile = {"email": new_email, "password": new_pass, "name": new_name, "role": "Member"}
-                        st.session_state.user_db = pd.concat([st.session_state.user_db, pd.DataFrame([new_profile])], ignore_index=True)
-                        st.success(f"Success! Account for {new_name} created. You can now toggle to 'Log In' above.")
+    if gate_mode == "Log In to My Account":
+        with st.form("login_form", clear_on_submit=False):
+            st.markdown("### 🔒 Secure Access Portal")
+            login_email = st.text_input("Gmail Address")
+            login_pass = st.text_input("Password", type="password")
+            submit_login = st.form_submit_button("Log In", type="primary", use_container_width=True)
+            
+            if submit_login:
+                db = st.session_state.user_db
+                user_match = db[(db["email"] == login_email) & (db["password"] == login_pass)]
+                if not user_match.empty:
+                    st.session_state.current_user = login_email
+                    st.session_state.current_role = user_match.iloc[0]["role"]
+                    st.session_state.current_name = user_match.iloc[0]["name"]
+                    st.success("Authorized.")
+                    st.rerun()
+                else:
+                    st.error("Invalid email address or password sequence.")
+                    
+    elif gate_mode == "Register New Family Member (Sign Up)":
+        with st.form("signup_form", clear_on_submit=True):
+            st.markdown("### 📝 Family Registration Form")
+            new_name = st.text_input("Full Name", placeholder="e.g. Sita Maharjan")
+            new_email = st.text_input("Gmail Address", placeholder="username@gmail.com")
+            new_pass = st.text_input("Create Security Password", type="password")
+            submit_signup = st.form_submit_button("Create Account & Register", type="primary", use_container_width=True)
+            
+            if submit_signup:
+                if new_name.strip() == "" or new_email.strip() == "" or new_pass.strip() == "":
+                    st.error("All entry fields are mandatory to complete user registration profiles.")
+                elif new_email in st.session_state.user_db["email"].values:
+                    st.error("This email address is already registered inside Mero App database.")
+                else:
+                    new_profile = {"email": new_email, "password": new_pass, "name": new_name, "role": "Member"}
+                    st.session_state.user_db = pd.concat([st.session_state.user_db, pd.DataFrame([new_profile])], ignore_index=True)
+                    st.success(f"Success! Account for {new_name} created. You can now toggle to 'Log In' above.")
     st.stop()
 
 # ==========================================
@@ -123,7 +118,6 @@ st.sidebar.title("Mero App")
 st.sidebar.markdown(f"🛡️ **{current_name}** ({current_role})")
 st.sidebar.write("---")
 
-# Main Navigation Tree Layout
 menu_options = ["💎 Home Overview", "💰 Expense Tracker", "🎯 My To-Do List", "🩺 Health Monitor", "💳 Credit & Payments"]
 if current_role == "Admin":
     menu_options.append("👑 Family Governance")
@@ -199,5 +193,10 @@ elif active_tab == "💰 Expense Tracker":
         df_invoice = pd.DataFrame(st.session_state.invoice_items)
         st.dataframe(df_invoice, use_container_width=True)
         
-        col_b1, col_b2 = st.columns(2)
-        with col_b1:
+        if st.button("💾 SAVE INVOICE ENTRY", type="primary", use_container_width=True):
+            if len(df_invoice) > 0:
+                st.session_state.expenses = pd.concat([st.session_state.expenses, df_invoice], ignore_index=True)
+                st.session_state.invoice_items = [] 
+                st.success("Invoice committed safely to your database!")
+                st.rerun()
+                
