@@ -4,58 +4,28 @@ import altair as alt
 from datetime import datetime, timedelta
 
 # ==========================================
-# 1. PLATFORM CONFIGURATION & WORLD-CLASS UI
+# 1. PLATFORM CONFIGURATION & CORE LAYOUT
 # ==========================================
 st.set_page_config(
     page_title="Mero App", 
     layout="wide", 
     page_icon="💼",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
-# Custom CSS to perfectly center the login card and make it compact like high-end apps
+# FIXED: Standardized page margins to ensure headers NEVER get cut off by the top navigation bar
 st.markdown("""
 <style>
-    /* Global Background Adjustments */
-    .stApp {
-        background-color: #0f172a !important;
-    }
+    /* Remove background alignment offsets that hide text titles */
     .block-container {
         max-width: 100% !important;
-        padding: 0rem !important;
+        padding-top: 5rem !important; /* Added huge top spacing to push text perfectly down into view */
+        padding-bottom: 2rem !important;
+        padding-left: 4rem !important;
+        padding-right: 4rem !important;
     }
-    
-    /* Centered Compact Form Card container */
-    .login-container {
-        max-width: 420px;
-        margin: 80px auto;
-        padding: 40px;
-        background: #1e293b;
-        border-radius: 12px;
-        border: 1px solid #334155;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-        text-align: center;
-    }
-    
-    .app-headline {
-        font-size: 28px;
-        font-weight: 700;
-        color: #ffffff;
-        margin-bottom: 8px;
-        letter-spacing: -0.5px;
-    }
-    
-    .app-sub {
-        font-size: 14px;
-        color: #94a3b8;
-        margin-bottom: 32px;
-    }
-    
-    .or-divider {
-        margin: 20px 0;
-        color: #64748b;
-        font-size: 12px;
-        position: relative;
+    .stApp {
+        background-color: #0f172a !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -68,22 +38,16 @@ if "user_db" not in st.session_state:
 
 # Initialize Storage tables with baseline data rows
 if "expenses" not in st.session_state:
-    st.session_state.expenses = pd.DataFrame([
-        {"user": "razumaharjan@gmail.com", "date": pd.to_datetime("2026-09-18"), "shop": "System Setup", "items": "Initial Ledger Configuration", "amount": 0.0, "payment_method": "Cash", "main_category": "Groceries", "sub_category": "General"}
-    ])
+    st.session_state.expenses = pd.DataFrame(columns=["user", "date", "shop", "items", "amount", "payment_method", "main_category", "sub_category"])
 
 if "tasks" not in st.session_state:
     st.session_state.tasks = pd.DataFrame(columns=["user", "title", "deadline", "client", "address", "priority", "status"])
 
 if "health" not in st.session_state:
-    st.session_state.health = pd.DataFrame([
-        {"user": "razumaharjan@gmail.com", "date": datetime.today().date(), "category": "System Initialized", "details": "Health monitor ready."}
-    ])
+    st.session_state.health = pd.DataFrame(columns=["user", "date", "category", "details"])
 
 if "credit" not in st.session_state:
-    st.session_state.credit = pd.DataFrame([
-        {"user": "razumaharjan@gmail.com", "type": "Money Lent (People Owe Me)", "name": "System Ledger", "amount": 0.0, "due_date": datetime.today().date(), "status": "Initialized"}
-    ])
+    st.session_state.credit = pd.DataFrame(columns=["user", "type", "name", "amount", "due_date", "status"])
 
 if "invoice_items" not in st.session_state:
     st.session_state.invoice_items = []
@@ -103,17 +67,14 @@ if "gate_page" not in st.session_state:
 # 2. WORLD-CLASS CENTRAL LOGIN / SIGNUP
 # ==========================================
 if st.session_state.current_user is None:
-    
-    # Create side layout spacers to force the login card to stay perfectly in the middle
     left_space, center_card, right_space = st.columns([1, 1.1, 1])
-    
     with center_card:
         st.write("") 
         st.write("")
         
         # --- LOGIN MODE SCREEN ---
         if st.session_state.gate_page == "login":
-            st.markdown('<div style="text-align: center; margin-top: 40px;"><p class="app-headline">Welcome to Mero App</p><p class="app-sub">Your personal space to plan, track, and manage.</p></div>', unsafe_allow_html=True)
+            st.markdown('<div style="text-align: center; margin-top: 40px; margin-bottom: 20px;"><p style="font-size: 28px; font-weight: 700; color: #ffffff; letter-spacing: -0.5px; margin-bottom: 8px;">Welcome to Mero App</p><p style="font-size: 14px; color: #94a3b8; margin-bottom: 20px;">Your personal space to plan, track, and manage.</p></div>', unsafe_allow_html=True)
             
             with st.form("login_form"):
                 login_email = st.text_input("Email / Gmail Address")
@@ -132,7 +93,7 @@ if st.session_state.current_user is None:
                     else:
                         st.error("Invalid email address or password sequence.")
             
-            st.markdown('<div class="or-divider">─── OR ───</div>', unsafe_allow_html=True)
+            st.markdown('<div style="margin: 20px 0; color: #64748b; font-size: 12px; text-align: center;">─── OR ───</div>', unsafe_allow_html=True)
             
             # Interactive Continuous Google Authentication Option Button
             if st.button("🔴 Continue with Google (Gmail)", use_container_width=True):
@@ -143,13 +104,13 @@ if st.session_state.current_user is None:
                 st.rerun()
                 
             st.write("")
-            if st.button("Don't have an account? Sign up", type="secondary"):
+            if st.button("Don't have an account? Sign up", type="secondary", use_container_width=True):
                 st.session_state.gate_page = "signup"
                 st.rerun()
 
         # --- SIGN UP MODE SCREEN ---
         elif st.session_state.gate_page == "signup":
-            st.markdown('<div style="text-align: center; margin-top: 40px;"><p class="app-headline">Create Account</p><p class="app-sub">Register your dashboard profile workspace.</p></div>', unsafe_allow_html=True)
+            st.markdown('<div style="text-align: center; margin-top: 40px; margin-bottom: 20px;"><p style="font-size: 28px; font-weight: 700; color: #ffffff; letter-spacing: -0.5px; margin-bottom: 8px;">Create Account</p><p style="font-size: 14px; color: #94a3b8; margin-bottom: 20px;">Register your dashboard profile workspace.</p></div>', unsafe_allow_html=True)
             
             with st.form("signup_form"):
                 new_name = st.text_input("Full Name", placeholder="e.g. Sita Maharjan")
@@ -171,7 +132,7 @@ if st.session_state.current_user is None:
                         st.rerun()
             
             st.write("")
-            if st.button("Already have an account? Log in", type="secondary"):
+            if st.button("Already have an account? Log in", type="secondary", use_container_width=True):
                 st.session_state.gate_page = "login"
                 st.rerun()
                 
@@ -192,7 +153,7 @@ menu_options = ["💎 Home Overview", "💰 Expense Tracker", "🎯 My To-Do Lis
 if current_role == "Admin":
     menu_options.append("👑 Family Governance")
 
-active_tab = st.sidebar.radio("Menu Navigation Matrix", menu_options)
+active_tab = st.sidebar.radio("Navigation Menu", menu_options)
 
 st.sidebar.write("---")
 if st.sidebar.button("Log Out Account Session", type="secondary", use_container_width=True):
@@ -204,13 +165,14 @@ if st.sidebar.button("Log Out Account Session", type="secondary", use_container_
 # --- MODULE 1: HOME OVERVIEW ---
 if active_tab == "💎 Home Overview":
     st.title("💎 Summary Overview")
-    st.write(f"Hello {current_name}! Here are your quick operational metrics.")
+    st.write(f"Welcome back, {current_name}! Here is the current financial and operational snapshot of your personal workspace.")
     st.write("")
     
     my_expenses = st.session_state.expenses[st.session_state.expenses["user"] == current_user]
     my_tasks = st.session_state.tasks[st.session_state.tasks["user"] == current_user]
     my_credit = st.session_state.credit[st.session_state.credit["user"] == current_user]
     
+    # Clean top metrics cards layout
     c1, c2, c3 = st.columns(3)
     with c1:
         st.metric(label="Your Registered Expenses", value=f"NPR {my_expenses['amount'].sum():,.2f}")
@@ -220,17 +182,27 @@ if active_tab == "💎 Home Overview":
         receivables = my_credit[my_credit['type'] == 'Money Lent (People Owe Me)']['amount'].sum()
         st.metric(label="Your Outstanding Receivables", value=f"NPR {receivables:,.2f}")
 
-# --- MODULE 2: INVOICE-STYLE EXPENSE TRACKER ---
-elif active_tab == "💰 Expense Tracker":
-    st.title("💰 Personal Expense Tracker")
-    st.write("Add multiple items to build your bill list below, then click save at the end.")
-    st.write("")
+    # FIXED: Filled the huge empty space right in the center with a premium dashboard guide layout
+    st.write("---")
+    st.subheader("💡 Quick Start Workspace Guide")
     
-    col_input, col_display = st.columns([1.2, 1.2])
-    
-    with col_input:
-        st.subheader("I. Metadata Bill Details")
-        e_date = st.date_input("Date Selection", datetime.today())
-        e_shop = st.text_input("Shop / Merchant Name", placeholder="e.g. Bhat-Bhateni")
-        e_method = st.selectbox("Payment Method", ["QR Payment", "E-Wallet (eSewa/Khalti)", "Cash", "Cheque"])
-        
+    col_g1, col_g2 = st.columns(2)
+    with col_g1:
+        st.info("""
+        **💰 Tracking Expenses & Invoices**
+        Open the **Expense Tracker** module on the left side menu to log daily expenses. 
+        You can build multi-item store lists (like *Tea, Coffee, Petrol, or Groceries*) 
+        on a running store receipt list before locking them into your database.
+        """)
+        st.info("""
+        **🎯 Managing Deadlines & Client Work**
+        Head over to **My To-Do List** to add active targets, write down client company names, 
+        and note specific project site addresses. Completed entries are safely locked away as evidence for future reference.
+        """)
+    with col_g2:
+        st.info("""
+        **🩺 Health & Wellness Monitoring**
+        Use the **Health Monitor** tab to record your consistent daily workout routines, 
+        medicine prescription track logs, and physical clinic consultation summary updates.
+        """)
+        st.info("""
