@@ -28,7 +28,7 @@ st.markdown("""
     /* Centered Compact Form Card container */
     .login-container {
         max-width: 420px;
-        margin: 80px autopx;
+        margin: 80px auto;
         padding: 40px;
         background: #1e293b;
         border-radius: 12px;
@@ -49,24 +49,6 @@ st.markdown("""
         font-size: 14px;
         color: #94a3b8;
         margin-bottom: 32px;
-    }
-    
-    /* Google Sign In Layout Button */
-    .google-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background-color: #ffffff;
-        color: #1e293b;
-        font-weight: 500;
-        font-size: 14px;
-        padding: 10px 24px;
-        border-radius: 8px;
-        border: 1px solid #cbd5e1;
-        cursor: pointer;
-        margin-top: 20px;
-        width: 100%;
-        text-align: center;
     }
     
     .or-divider {
@@ -126,12 +108,12 @@ if st.session_state.current_user is None:
     left_space, center_card, right_space = st.columns([1, 1.1, 1])
     
     with center_card:
-        st.write("") # Top vertical padding spacer
+        st.write("") 
         st.write("")
         
         # --- LOGIN MODE SCREEN ---
         if st.session_state.gate_page == "login":
-            st.markdown('<div style="text-align: center; margin-top: 40px;"><p class="app-headline">Welcome back to Mero App</p><p class="app-sub">Sign in to your dashboard to manage your workspace.</p></div>', unsafe_allow_html=True)
+            st.markdown('<div style="text-align: center; margin-top: 40px;"><p class="app-headline">Welcome to Mero App</p><p class="app-sub">Your personal space to plan, track, and manage.</p></div>', unsafe_allow_html=True)
             
             with st.form("login_form"):
                 login_email = st.text_input("Email / Gmail Address")
@@ -154,7 +136,6 @@ if st.session_state.current_user is None:
             
             # Interactive Continuous Google Authentication Option Button
             if st.button("🔴 Continue with Google (Gmail)", use_container_width=True):
-                # Auto-fill using your primary registered administrator Gmail account for convenient instant access
                 st.session_state.current_user = "razumaharjan@gmail.com"
                 st.session_state.current_role = "Admin"
                 st.session_state.current_name = "Raju Maharjan"
@@ -162,11 +143,9 @@ if st.session_state.current_user is None:
                 st.rerun()
                 
             st.write("")
-            col_link_text, _ = st.columns([2, 1])
-            with col_link_text:
-                if st.button("Don't have an account? Sign up", type="secondary"):
-                    st.session_state.gate_page = "signup"
-                    st.rerun()
+            if st.button("Don't have an account? Sign up", type="secondary"):
+                st.session_state.gate_page = "signup"
+                st.rerun()
 
         # --- SIGN UP MODE SCREEN ---
         elif st.session_state.gate_page == "signup":
@@ -209,7 +188,7 @@ st.sidebar.title("Mero App")
 st.sidebar.markdown(f"🛡️ **{current_name}** ({current_role})")
 st.sidebar.write("---")
 
-menu_options = ["💎 Home Overview", "💰 Expense Tracker", "🎯 My To-Do List", "%s Health Monitor" % "🩺", "💳 Credit & Payments"]
+menu_options = ["💎 Home Overview", "💰 Expense Tracker", "🎯 My To-Do List", "🩺 Health Monitor", "💳 Credit & Payments"]
 if current_role == "Admin":
     menu_options.append("👑 Family Governance")
 
@@ -239,3 +218,19 @@ if active_tab == "💎 Home Overview":
         st.metric(label="Your Active Pending Tasks", value=f"{len(my_tasks[my_tasks['status'] == 'Pending'])} Tasks Left")
     with c3:
         receivables = my_credit[my_credit['type'] == 'Money Lent (People Owe Me)']['amount'].sum()
+        st.metric(label="Your Outstanding Receivables", value=f"NPR {receivables:,.2f}")
+
+# --- MODULE 2: INVOICE-STYLE EXPENSE TRACKER ---
+elif active_tab == "💰 Expense Tracker":
+    st.title("💰 Personal Expense Tracker")
+    st.write("Add multiple items to build your bill list below, then click save at the end.")
+    st.write("")
+    
+    col_input, col_display = st.columns([1.2, 1.2])
+    
+    with col_input:
+        st.subheader("I. Metadata Bill Details")
+        e_date = st.date_input("Date Selection", datetime.today())
+        e_shop = st.text_input("Shop / Merchant Name", placeholder="e.g. Bhat-Bhateni")
+        e_method = st.selectbox("Payment Method", ["QR Payment", "E-Wallet (eSewa/Khalti)", "Cash", "Cheque"])
+        
