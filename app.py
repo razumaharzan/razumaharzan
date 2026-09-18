@@ -46,7 +46,7 @@ if "logged_in" not in st.session_state:
 # ==========================================
 # 2. APPLICATION LOGIN SECURITY GATEWAY
 # ==========================================
-if not st.session_state.logged_in:
+if st.session_state.logged_in == False:
     st.title("💼 Mero App")
     st.subheader("Premium Personal Management Suite")
     
@@ -97,9 +97,9 @@ if active_tab == "💎 Executive Hub":
         st.metric(label="Outstanding Family Receivables", value=f"NPR {receivables:,.2f}")
 
 # --- MODULE 2: INVOICE-STYLE SPLIT-SCREEN FINANCIAL LEDGER ---
-elif active_tab == "💰 Financial Ledger":
+if active_tab == "💰 Financial Ledger":
     st.title("💰 Invoice-Style Financial Ledger")
-    st.write("Build a multi-item store receipt receipt, check running totals, and save everything at once.")
+    st.write("Build a multi-item store receipt, check running totals, and save everything at once.")
     st.write("")
     
     col_input, col_display = st.columns([1.2, 1.2])
@@ -134,15 +134,9 @@ elif active_tab == "💰 Financial Ledger":
             elif item_price <= 0:
                 st.error("Please enter a valid price greater than 0.")
             else:
-                # Add to the temporary invoice session memory list
                 st.session_state.invoice_items.append({
-                    "date": pd.to_datetime(e_date),
-                    "shop": e_shop,
-                    "items": item_name,
-                    "amount": item_price,
-                    "payment_method": e_method,
-                    "main_category": main_cat,
-                    "sub_category": e_sub_cat
+                    "date": pd.to_datetime(e_date), "shop": e_shop, "items": item_name, "amount": item_price,
+                    "payment_method": e_method, "main_category": main_cat, "sub_category": e_sub_cat
                 })
                 st.toast(f"Added {item_name} to receipt list!")
                 st.rerun()
@@ -151,22 +145,18 @@ elif active_tab == "💰 Financial Ledger":
         st.subheader("🛒 3. Live Invoice Preview List")
         
         if len(st.session_state.invoice_items) > 0:
-            # Convert current invoice items into a visual grid table
             df_invoice = pd.DataFrame(st.session_state.invoice_items)
             st.dataframe(df_invoice[["items", "main_category", "sub_category", "amount"]], use_container_width=True)
             
-            # Running grand total display calculation
             grand_total = df_invoice["amount"].sum()
             st.markdown(f"### 🏷️ Running Invoice Total: **NPR {grand_total:,.2f}**")
             
             col_b1, col_b2 = st.columns(2)
             with col_b1:
                 if st.button("💾 SAVE INVOICE ENTRY", type="primary", use_container_width=True):
-                    # Commit temporary invoice items directly into main historical database table
                     st.session_state.expenses = pd.concat([st.session_state.expenses, df_invoice], ignore_index=True)
-                    st.session_state.invoice_items = [] # Wipe list clean for next time
+                    st.session_state.invoice_items = [] 
                     st.success("Invoice successfully verified, authorized and locked into permanent database!")
-                    st.date_input.value = datetime.today() # Reset layout fields
                     st.rerun()
             with col_b2:
                 if st.button("❌ Clear Current Receipt List", type="secondary", use_container_width=True):
@@ -178,21 +168,17 @@ elif active_tab == "💰 Financial Ledger":
             
     st.write("---")
     st.subheader("📋 Locked Transaction History Database")
-    if not st.session_state.expenses.empty:
-        # Grouped category analytics visualization
+    if len(st.session_state.expenses) > 0:
         c_data = st.session_state.expenses.groupby("main_category")["amount"].sum().reset_index()
         chart = alt.Chart(c_data).mark_bar(color="#38bdf8", cornerRadiusTopLeft=6, cornerRadiusTopRight=6).encode(
             x=alt.X("main_category:N", title="Segment"),
             y=alt.Y("amount:Q", title="Total capital spent (NPR)")
         ).properties(height=200)
         st.altair_chart(chart, use_container_width=True)
-        
         st.dataframe(st.session_state.expenses.sort_values(by="date", ascending=False), use_container_width=True)
-    else:
-        st.caption("No historical invoices stored in permanent memory storage logs yet.")
 
 # --- MODULE 3: OPERATIONS & TASKS ---
-elif active_tab == "🎯 Operations & Tasks":
+if active_tab == "🎯 Operations & Tasks":
     st.title("🎯 Operations Engine & Task Pipelines")
     st.write("Track corporate obligations, set client project parameters, and archive secure billing history logs.")
     st.write("")
@@ -209,3 +195,13 @@ elif active_tab == "🎯 Operations & Tasks":
         st.write("")
         
         if st.button("Commit Task to Queue", type="primary", use_container_width=True):
+            new_t = pd.DataFrame([{"title": t_title, "deadline": t_deadline, "client": t_client, "address": t_address, "priority": t_priority, "status": "Pending"}])
+            st.session_state.tasks = pd.concat([st.session_state.tasks, new_t], ignore_index=True)
+            st.success("Target workflow successfully deployed.")
+            st.rerun()
+            
+    with col_task_logs:
+        st.subheader("⚡ Live Operations Pipeline Monitor")
+        p_tasks = st.session_state.tasks[st.session_state.tasks["status"] == "Pending"]
+        
+        if len(p_tasks) > 0:
