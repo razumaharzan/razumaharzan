@@ -4,200 +4,132 @@ import altair as alt
 from datetime import datetime, timedelta
 
 # ==========================================
-# PREMIUM CORE CONFIGURATION & CLASSIC STYLING
+# 1. CORE SYSTEM CONFIGURATION & STYLE
 # ==========================================
 st.set_page_config(
-    page_title="Mero App — Enterprise Dashboard", 
+    page_title="Mero App — Premium Management Suite", 
     layout="wide", 
     page_icon="💼",
     initial_sidebar_state="expanded"
 )
 
-# Custom Premium CSS Injection for sleek UI cards, typography, and borders
+# Custom Premium SaaS Styles
 st.markdown("""
 <style>
     @import url('https://googleapis.com');
+    html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     
-    html, body, [class*="css"] {
-        font-family: 'Inter', sans-serif;
-    }
-    
-    /* Premium Dashboard Cards */
     .metric-card {
         background: #1e293b;
         border: 1px solid #334155;
         padding: 24px;
         border-radius: 16px;
-        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
         margin-bottom: 20px;
     }
     .metric-val {
-        font-size: 32px;
+        font-size: 30px;
         font-weight: 700;
         color: #38bdf8;
         margin-top: 8px;
     }
     .metric-lbl {
-        font-size: 13px;
-        font-weight: 500;
+        font-size: 12px;
+        font-weight: 600;
         color: #94a3b8;
         text-transform: uppercase;
         letter-spacing: 0.05em;
     }
-    
-    /* Custom Badges for Priorities */
-    .badge {
-        padding: 6px 12px;
-        border-radius: 9999px;
-        font-size: 12px;
-        font-weight: 600;
-        display: inline-block;
-    }
-    .badge-critical { background-color: #ef4444; color: white; }
-    .badge-high { background-color: #f97316; color: white; }
-    .badge-medium { background-color: #eab308; color: black; }
-    .badge-low { background-color: #3b82f6; color: white; }
-    .badge-done { background-color: #10b981; color: white; }
-    
-    /* Clean Header Lines */
     .main-title {
         font-size: 36px;
         font-weight: 800;
-        letter-spacing: -0.025em;
         background: linear-gradient(to right, #38bdf8, #818cf8);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        margin-bottom: 4px;
-    }
-    .sub-title {
-        color: #64748b;
-        font-size: 16px;
-        margin-bottom: 32px;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Persistent Session Memory
-if "users" not in st.session_state:
-    st.session_state.users = {
-        "razumaharjan@gmail.com": {"password": "admin123", "role": "Admin", "name": "Raju Maharjan"},
-        "family1@gmail.com": {"password": "user123", "role": "Member", "name": "Sita Maharjan"}
-    }
-
+# Initialize Session Storage Frameworks
 if "expenses" not in st.session_state:
-    st.session_state.expenses = pd.DataFrame(columns=[
-        "user", "date", "shop", "items", "amount", "payment_method", "main_category", "sub_category"
-    ])
+    st.session_state.expenses = pd.DataFrame(columns=["date", "shop", "items", "amount", "payment_method", "main_category", "sub_category"])
 
 if "tasks" not in st.session_state:
-    st.session_state.tasks = pd.DataFrame(columns=[
-        "user", "title", "deadline", "client", "address", "priority", "status"
-    ])
+    st.session_state.tasks = pd.DataFrame(columns=["title", "deadline", "client", "address", "priority", "status"])
 
 if "health" not in st.session_state:
-    st.session_state.health = pd.DataFrame(columns=["user", "date", "activity_type", "details"])
+    st.session_state.health = pd.DataFrame(columns=["date", "activity_type", "details"])
 
 if "credit" not in st.session_state:
-    st.session_state.credit = pd.DataFrame(columns=["user", "type", "person", "amount", "due_date", "status"])
+    st.session_state.credit = pd.DataFrame(columns=["type", "person", "amount", "due_date", "status"])
 
-if "logged_in_user" not in st.session_state:
-    st.session_state.logged_in_user = None
-if "user_role" not in st.session_state:
-    st.session_state.user_role = None
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
 
 # ==========================================
-# 2. PREMIUM SIGN IN GATEWAY
+# 2. APP GATEWAY AUTHENTICATION
 # ==========================================
-if st.session_state.logged_in_user is None:
-    st.markdown('<div style="text-align: center; margin-top: 80px;"><p class="main-title">MERO APP</p><p class="sub-title">Enterprise Personal Management Suite</p></div>', unsafe_allow_html=True)
+if not st.session_state.logged_in:
+    st.markdown('<div style="text-align: center; margin-top: 80px;"><p class="main-title">MERO APP</p><p style="color:#64748b;">Premium Personal ERP & Finance Suite</p></div>', unsafe_allow_html=True)
     
-    col_l1, col_l2, col_l3 = st.columns([1, 1.2, 1])
-    with col_l2:
+    col1, col2, col3 = st.columns([1, 1.2, 1])
+    with col2:
         st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-        st.markdown('<p class="metric-lbl" style="text-align:center;">Secure Gateway Access</p>', unsafe_allow_html=True)
         email = st.text_input("Gmail Address")
-        password = st.text_input("Security Access Code", type="password")
+        password = st.text_input("Security Password", type="password")
         st.write("")
-        if st.button("Authenticate Session", type="primary", use_container_width=True):
-            if email in st.session_state.users and st.session_state.users[email]["password"] == password:
-                st.session_state.logged_in_user = email
-                st.session_state.user_role = st.session_state.users[email]["role"]
+        if st.button("Authenticate & Log In", type="primary", use_container_width=True):
+            if email == "razumaharjan@gmail.com" and password == "admin123":
+                st.session_state.logged_in = True
                 st.rerun()
             else:
-                st.error("Authentication credentials failed.")
+                st.error("Invalid security access credentials.")
         st.markdown('</div>', unsafe_allow_html=True)
+
+# ==========================================
+# 3. SECURE AUTHENTICATED SYSTEM LAYOUT
+# ==========================================
 else:
-    current_user = st.session_state.logged_in_user
-    current_role = st.session_state.user_role
-    user_display_name = st.session_state.users[current_user]["name"]
+    st.sidebar.markdown('<p class="main-title" style="font-size:24px; padding-left:10px;">Mero App</p>', unsafe_allow_html=True)
+    st.sidebar.markdown('<div style="padding-left:10px; color:#94a3b8; font-size:14px; margin-bottom:20px;">🛡️ Account: <b>Raju Maharjan</b> (Admin)</div>', unsafe_allow_html=True)
     
-    # Premium Navigation Sidebar Layout
-    st.sidebar.markdown(f'<p class="main-title" style="font-size:24px; padding-left:10px;">Mero App</p>', unsafe_allow_html=True)
-    st.sidebar.markdown(f'<div style="padding-left:10px; color:#94a3b8; font-size:14px; margin-bottom:20px;">🛡️ Welcome, <b>{user_display_name}</b></div>', unsafe_allow_html=True)
-    
-    tabs = ["💎 Executive Hub", "💰 Financial Ledger", "🎯 Operations & Tasks", "🩺 Wellness & Health", "💳 Credit Counterparty"]
-    if current_role == "Admin":
-        tabs.append("👑 Family Governance")
-        
-    active_tab = st.sidebar.radio("Application Matrix", tabs)
+    active_tab = st.sidebar.radio("Dashboard Matrix", ["💎 Executive Hub", "💰 Financial Ledger", "🎯 Operations & Tasks", "🩺 Wellness & Health", "💳 Credit Counterparty"])
     
     st.sidebar.write("")
-    if st.sidebar.button("Terminate Session", type="secondary", use_container_width=True):
-        st.session_state.logged_in_user = None
-        st.session_state.user_role = None
+    if st.sidebar.button("Log Out / Terminate", type="secondary", use_container_width=True):
+        st.session_state.logged_in = False
         st.rerun()
 
-    # ==========================================
-    # 3. EXECUTIVE HUB (SUMMARY DASHBOARD)
-    # ==========================================
-    if "Executive Hub" in active_tab:
-        st.markdown(f'<p class="main-title">Executive Overview Dashboard</p>', unsafe_allow_html=True)
-        st.markdown(f'<p class="sub-title">Real-time macro statistics for {user_display_name}</p>', unsafe_allow_html=True)
+    # --- TAB 1: EXECUTIVE HUB ---
+    if active_tab == "💎 Executive Hub":
+        st.markdown('<p class="main-title">Executive Hub</p>', unsafe_allow_html=True)
+        st.write("Real-time summary analysis of your system modules.")
         
-        # Calculate dynamic live data summaries
-        my_exp = st.session_state.expenses[st.session_state.expenses["user"] == current_user]
-        my_tsk = st.session_state.tasks[st.session_state.tasks["user"] == current_user]
-        my_crd = st.session_state.credit[st.session_state.credit["user"] == current_user]
-        
-        total_spent = f"NPR {my_exp['amount'].sum():,.2f}" if not my_exp.empty else "NPR 0.00"
-        active_tasks = len(my_tsk[my_tsk["status"] == "Pending"])
-        total_credit = f"NPR {my_crd[my_crd['type'] == 'Money Lent (They Owe You)']['amount'].sum():,.2f}" if not my_crd.empty else "NPR 0.00"
-        
-        # Premium Row Card Grid Layout
         c1, c2, c3 = st.columns(3)
         with c1:
-            st.markdown(f'<div class="metric-card"><div class="metric-lbl">Cumulative Expenses</div><div class="metric-val">{total_spent}</div></div>', unsafe_allow_html=True)
+            val = f"NPR {st.session_state.expenses['amount'].sum():,.2f}"
+            st.markdown(f'<div class="metric-card"><div class="metric-lbl">Total Expenses</div><div class="metric-val">{val}</div></div>', unsafe_allow_html=True)
         with c2:
-            st.markdown(f'<div class="metric-card"><div class="metric-lbl">Active Operations Queue</div><div class="metric-val" style="color:#f43f5e;">{active_tasks} Open Tasks</div></div>', unsafe_allow_html=True)
+            val = len(st.session_state.tasks[st.session_state.tasks["status"] == "Pending"])
+            st.markdown(f'<div class="metric-card"><div class="metric-lbl">Active Pending Tasks</div><div class="metric-val" style="color:#f43f5e;">{val} Tasks</div></div>', unsafe_allow_html=True)
         with c3:
-            st.markdown(f'<div class="metric-card"><div class="metric-lbl">Total Outstanding Receivables</div><div class="metric-val" style="color:#10b981;">{total_credit}</div></div>', unsafe_allow_html=True)
-            
-        st.subheader("🗓️ Today's Action Guidelines")
-        if active_tasks == 0:
-            st.info("Your operations schedule is clean for today. No high-priority deadlines tracked.")
-        else:
-            st.dataframe(my_tsk[my_tsk["status"] == "Pending"][["title", "deadline", "priority"]], use_container_width=True)
+            val = f"NPR {st.session_state.credit[st.session_state.credit['type'] == 'Money Lent (They Owe You)']['amount'].sum():,.2f}"
+            st.markdown(f'<div class="metric-card"><div class="metric-lbl">Outstanding Receivables</div><div class="metric-val" style="color:#10b981;">{val}</div></div>', unsafe_allow_html=True)
 
-    # ==========================================
-    # 4. EXPENSE TRACKER
-    # ==========================================
-    elif "Financial Ledger" in active_tab:
+    # --- TAB 2: FINANCIAL LEDGER ---
+    elif active_tab == "💰 Financial Ledger":
         st.markdown('<p class="main-title">Financial Transaction Ledger</p>', unsafe_allow_html=True)
-        st.markdown('<p class="sub-title">Track allocations, process operational costs, and evaluate visual graphs</p>', unsafe_allow_html=True)
         
-        col_form, col_chart = st.columns([1, 1.4])
-        
-        with col_form:
+        col_f, col_c = st.columns([1, 1.4])
+        with col_f:
             st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-            st.markdown('<p class="metric-lbl" style="margin-bottom:15px; color:#38bdf8;">📝 Create Entry Record</p>', unsafe_allow_html=True)
+            e_date = st.date_input("Accounting Date", datetime.today())
+            e_shop = st.text_input("Merchant Entity Name")
+            e_items = st.text_area("Itemization Details")
+            e_amount = st.number_input("Transaction Volume (NPR)", min_value=0.0, step=50.0)
+            e_method = st.selectbox("Execution Channel", ["QR Payment", "E-Wallet Transfer", "Cash Settlement", "Bank Cheque"])
             
-            exp_date = st.date_input("Accounting Date", datetime.today())
-            exp_shop = st.text_input("Merchant Entity", placeholder="e.g., Bhat-Bhateni, Local Tea Shop")
-            exp_items = st.text_area("Itemization Details", placeholder="Separate items cleanly")
-            exp_amount = st.number_input("Transaction Volume (NPR)", min_value=0.0, step=50.0)
-            exp_method = st.selectbox("Execution Channel", ["QR Payment", "E-Wallet Transfer", "Cash Settlement", "Bank Cheque"])
-            
-            main_cat = st.selectbox("Primary Category Asset", ["Food & Dining", "Logistics & Transport", "Subscriptions", "Medical/Health", "Groceries"])
+            main_cat = st.selectbox("Primary Category", ["Food & Dining", "Logistics & Transport", "Subscriptions", "Medical/Health", "Groceries"])
             if main_cat == "Food & Dining":
                 sub_cat = st.selectbox("Sub-Allocation", ["Tea", "Coffee", "Breakfast", "Lunch", "Dinner"])
             elif main_cat == "Logistics & Transport":
@@ -207,3 +139,50 @@ else:
             elif main_cat == "Medical/Health":
                 sub_cat = st.selectbox("Sub-Allocation", ["Medicine Purchase", "Hospital Checkup", "Doctor Consultation"])
             else:
+                sub_cat = st.selectbox("Sub-Allocation", ["Kitchen Supplies", "Vegetables", "Fresh Meat", "Toiletries"])
+                
+            if st.button("Execute Ledger Log", type="primary", use_container_width=True):
+                new_row = pd.DataFrame([{"date": pd.to_datetime(e_date), "shop": e_shop, "items": e_items, "amount": e_amount, "payment_method": e_method, "main_category": main_cat, "sub_category": sub_cat}])
+                st.session_state.expenses = pd.concat([st.session_state.expenses, new_row], ignore_index=True)
+                st.success("Entry verified.")
+                st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
+            
+        with col_c:
+            if not st.session_state.expenses.empty:
+                st.markdown('<p class="metric-lbl">📊 Resource Allocation Matrix</p>', unsafe_allow_html=True)
+                c_data = st.session_state.expenses.groupby("main_category")["amount"].sum().reset_index()
+                chart = alt.Chart(c_data).mark_bar(cornerRadiusTopLeft=8, cornerRadiusTopRight=8).encode(
+                    x=alt.X("main_category:N", title="Operational Segment"),
+                    y=alt.Y("amount:Q", title="Capital (NPR)"),
+                    color="main_category:N"
+                ).properties(height=340)
+                st.altair_chart(chart, use_container_width=True)
+                
+        if not st.session_state.expenses.empty:
+            st.subheader("📋 Transaction History Ledger")
+            st.dataframe(st.session_state.expenses, use_container_width=True)
+
+    # --- TAB 3: OPERATIONS & TASKS ---
+    elif active_tab == "🎯 Operations & Tasks":
+        st.markdown('<p class="main-title">Operations Engine & To-Do Queue</p>', unsafe_allow_html=True)
+        
+        with st.expander("💼 Dispatch New Task", expanded=False):
+            t_title = st.text_input("Task Objective Name")
+            t_deadline = st.date_input("Target Deadline", datetime.today() + timedelta(days=1))
+            t_client = st.text_input("Client Corporate Profile")
+            t_address = st.text_input("Site Location Address")
+            t_priority = st.selectbox("Priority Urgency Tier", ["Critical", "High", "Medium", "Low"])
+            
+            if st.button("Commit Task to Queue", type="primary"):
+                new_t = pd.DataFrame([{"title": t_title, "deadline": t_deadline, "client": t_client, "address": t_address, "priority": t_priority, "status": "Pending"}])
+                st.session_state.tasks = pd.concat([st.session_state.tasks, new_t], ignore_index=True)
+                st.success("Task deployed.")
+                st.rerun()
+                
+        ct1, ct2 = st.columns(2)
+        with ct1:
+            st.markdown('<p class="metric-lbl" style="color:#ef4444;">⚡ Active Tasks Pipeline</p>', unsafe_allow_html=True)
+            p_tasks = st.session_state.tasks[st.session_state.tasks["status"] == "Pending"]
+            if not p_tasks.empty:
+                for idx, r in p_tasks.iterrows():
