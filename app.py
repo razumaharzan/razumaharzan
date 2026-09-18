@@ -4,7 +4,7 @@ import altair as alt
 from datetime import datetime, timedelta
 
 # ==========================================
-# 1. PREMIUM CORE INITIALIZATION
+# 1. PREMIUM FULL-WIDESCREEN INITIALIZATION
 # ==========================================
 st.set_page_config(
     page_title="Mero App — Premium Management Suite", 
@@ -13,11 +13,20 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom Premium SaaS Styles
+# Custom Premium SaaS Full-Width Styles
 st.markdown("""
 <style>
     @import url('https://googleapis.com');
     html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
+    
+    /* Force elements to stretch completely horizontal */
+    .block-container {
+        padding-top: 2rem !important;
+        padding-bottom: 0rem !important;
+        padding-left: 3rem !important;
+        padding-right: 3rem !important;
+        max-width: 100% !important;
+    }
     
     .metric-card {
         background: #1e293b;
@@ -47,10 +56,17 @@ st.markdown("""
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
+    .alert-panel {
+        background: #182235;
+        border-left: 5px solid #ef4444;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
 </style>
 """, unsafe_allow_html=True)
 
-# Initialize Storage Frameworks securely without any nested conditions
+# Initialize Storage Frameworks
 if "expenses" not in st.session_state:
     st.session_state.expenses = pd.DataFrame(columns=["date", "shop", "items", "amount", "payment_method", "main_category", "sub_category"])
 
@@ -92,7 +108,8 @@ if st.session_state.logged_in == False:
 st.sidebar.markdown('<p class="main-title" style="font-size:24px; padding-left:10px;">Mero App</p>', unsafe_allow_html=True)
 st.sidebar.markdown('<div style="padding-left:10px; color:#94a3b8; font-size:14px; margin-bottom:20px;">🛡️ Account: <b>Raju Maharjan</b> (Admin)</div>', unsafe_allow_html=True)
 
-active_tab = st.sidebar.radio("Dashboard Matrix", ["💎 Executive Hub", "💰 Financial Ledger", "🎯 Operations & Tasks", "🩺 Wellness & Health", "💳 Credit Counterparty"])
+# Set index=0 to ensure '💎 Executive Hub' opens automatically at start
+active_tab = st.sidebar.radio("Dashboard Matrix", ["💎 Executive Hub", "💰 Financial Ledger", "🎯 Operations & Tasks", "🩺 Wellness & Health", "💳 Credit Counterparty"], index=0)
 
 st.sidebar.write("")
 if st.sidebar.button("Log Out / Terminate", type="secondary", use_container_width=True):
@@ -103,6 +120,7 @@ if st.sidebar.button("Log Out / Terminate", type="secondary", use_container_widt
 if active_tab == "💎 Executive Hub":
     st.markdown('<p class="main-title">Executive Hub</p>', unsafe_allow_html=True)
     st.write("Real-time summary analysis of your active modules.")
+    st.write("")
     
     c1, c2, c3 = st.columns(3)
     with c1:
@@ -118,6 +136,7 @@ if active_tab == "💎 Executive Hub":
 # --- MODULE 2: FINANCIAL TRANSACTION LEDGER ---
 if active_tab == "💰 Financial Ledger":
     st.markdown('<p class="main-title">Financial Transaction Ledger</p>', unsafe_allow_html=True)
+    st.write("")
     
     col_f, col_c = st.columns([1, 1.4])
     with col_f:
@@ -129,7 +148,6 @@ if active_tab == "💰 Financial Ledger":
         e_method = st.selectbox("Execution Channel", ["QR Payment", "E-Wallet Transfer", "Cash Settlement", "Bank Cheque"])
         main_cat = st.selectbox("Primary Category", ["Food & Dining", "Logistics & Transport", "Subscriptions", "Medical/Health", "Groceries"])
         
-        # Flattened sub-categories map to prevent spacing errors
         sub_opts = ["General Item"]
         if main_cat == "Food & Dining": sub_opts = ["Tea", "Coffee", "Breakfast", "Lunch", "Dinner"]
         if main_cat == "Logistics & Transport": sub_opts = ["Petrol", "Gas Cylinder", "Indrive Ride", "Pathao Delivery", "Uber", "Public Bus"]
@@ -161,31 +179,23 @@ if active_tab == "💰 Financial Ledger":
         st.subheader("📋 Transaction History Ledger")
         st.dataframe(st.session_state.expenses, use_container_width=True)
 
-# --- MODULE 3: WORK SCHEDULER & OPERATIONS ---
+# --- MODULE 3: WIDESCREEN WORK SCHEDULER & OPERATIONS ---
 if active_tab == "🎯 Operations & Tasks":
     st.markdown('<p class="main-title">Operations Engine & To-Do Queue</p>', unsafe_allow_html=True)
+    st.write("")
     
-    with st.expander("💼 Dispatch New Task", expanded=False):
+    # 2 Horizontal Columns filling the absolute whole screen width
+    col_left_form, col_right_analytics = st.columns([1.1, 1.3])
+    
+    with col_left_form:
+        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+        st.markdown('<p class="metric-lbl" style="color:#38bdf8;">💼 Dispatch New Task Objective</p>', unsafe_allow_html=True)
         t_title = st.text_input("Task Objective Name")
         t_deadline = st.date_input("Target Deadline", datetime.today() + timedelta(days=1))
         t_client = st.text_input("Client Corporate Profile")
         t_address = st.text_input("Site Location Address")
         t_priority = st.selectbox("Priority Urgency Tier", ["Critical", "High", "Medium", "Low"])
         
-        if st.button("Commit Task to Queue", type="primary"):
+        if st.button("Commit Task to Queue", type="primary", use_container_width=True):
             new_t = pd.DataFrame([{"title": t_title, "deadline": t_deadline, "client": t_client, "address": t_address, "priority": t_priority, "status": "Pending"}])
             st.session_state.tasks = pd.concat([st.session_state.tasks, new_t], ignore_index=True)
-            st.success("Task deployed.")
-            st.rerun()
-            
-    ct1, ct2 = st.columns(2)
-    with ct1:
-        st.markdown('<p class="metric-lbl" style="color:#ef4444;">⚡ Active Tasks Pipeline</p>', unsafe_allow_html=True)
-        p_tasks = st.session_state.tasks[st.session_state.tasks["status"] == "Pending"]
-        
-        if len(p_tasks) > 0:
-            st.dataframe(p_tasks[["title", "priority", "deadline", "client", "address"]], use_container_width=True)
-            task_to_close = st.selectbox("Select Task to Complete", p_tasks["title"].tolist())
-            if st.button("Mark Selected Task Completed & Archive", type="secondary", use_container_width=True):
-                target_idx = st.session_state.tasks[st.session_state.tasks["title"] == task_to_close].index
-                st.session_state.tasks.at[target_idx, "status"] = "Done"
