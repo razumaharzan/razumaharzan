@@ -36,6 +36,10 @@ if "health" not in st.session_state:
 if "credit" not in st.session_state:
     st.session_state.credit = pd.DataFrame(columns=["type", "entity", "volume", "deadline", "status"])
 
+# Temporary memory to build an invoice list before clicking the final save button
+if "invoice_items" not in st.session_state:
+    st.session_state.invoice_items = []
+
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
@@ -92,21 +96,26 @@ if active_tab == "💎 Executive Hub":
         receivables = st.session_state.credit[st.session_state.credit['type'] == 'Money Lent (They Owe You)']['volume'].sum()
         st.metric(label="Outstanding Family Receivables", value=f"NPR {receivables:,.2f}")
 
-# --- MODULE 2: SPLIT-SCREEN FINANCIAL LEDGER ---
+# --- MODULE 2: INVOICE-STYLE SPLIT-SCREEN FINANCIAL LEDGER ---
 elif active_tab == "💰 Financial Ledger":
-    st.title("💰 Financial Transaction Ledger")
-    st.write("Process transaction metrics and audit historical expense data pipelines.")
+    st.title("💰 Invoice-Style Financial Ledger")
+    st.write("Build a multi-item store receipt receipt, check running totals, and save everything at once.")
     st.write("")
     
-    col_input, col_display = st.columns([1.1, 1.3])
+    col_input, col_display = st.columns([1.2, 1.2])
     
     with col_input:
-        st.subheader("📝 Record Entry Form")
-        e_date = st.date_input("Accounting Date", datetime.today())
-        e_shop = st.text_input("Merchant Entity Name", placeholder="e.g. Bhat-Bhateni")
-        e_items = st.text_area("Itemization Details", placeholder="List products purchased")
-        e_amount = st.number_input("Transaction Volume (NPR)", min_value=0.0, step=50.0)
+        st.subheader("🧾 1. Metadata Details")
+        e_date = st.date_input("Purchase Date", datetime.today())
+        e_shop = st.text_input("Merchant Entity Name", placeholder="e.g. Bhat-Bhateni, Local Tea Shop")
         e_method = st.selectbox("Execution Channel", ["QR Payment", "E-Wallet Transfer", "Cash Settlement", "Bank Cheque"])
+        
+        st.write("---")
+        st.subheader("➕ 2. Add Item to Current Invoice")
+        
+        item_name = st.text_input("Item Description name", placeholder="e.g., Milk, Coffee Pack, Petrol fill")
+        item_price = st.number_input("Item Price Cost (NPR)", min_value=0.0, step=10.0, value=0.0)
+        
         main_cat = st.selectbox("Primary Category", ["Food & Dining", "Logistics & Transport", "Subscriptions", "Medical/Health", "Groceries"])
         
         sub_opts = ["General Item"]
@@ -119,29 +128,70 @@ elif active_tab == "💰 Financial Ledger":
         e_sub_cat = st.selectbox("Sub-Allocation", sub_opts)
         st.write("")
         
-        if st.button("Execute Ledger Log", type="primary", use_container_width=True):
-            new_exp = pd.DataFrame([{"date": pd.to_datetime(e_date), "shop": e_shop, "items": e_items, "amount": e_amount, "payment_method": e_method, "main_category": main_cat, "sub_category": e_sub_cat}])
-            st.session_state.expenses = pd.concat([st.session_state.expenses, new_exp], ignore_index=True)
-            st.success("Transaction successfully authorized and stored.")
-            st.rerun()
-            
-    with col_display:
-        st.subheader("📊 Dynamic Financial Monitor")
-        if not st.session_state.expenses.empty:
-            c_data = st.session_state.expenses.groupby("main_category")["amount"].sum().reset_index()
-            chart = alt.Chart(c_data).mark_bar(color="#38bdf8", cornerRadiusTopLeft=6, cornerRadiusTopRight=6).encode(
-                x=alt.X("main_category:N", title="Segment"),
-                y=alt.Y("amount:Q", title="Capital spent (NPR)")
-            ).properties(height=260)
-            st.altair_chart(chart, use_container_width=True)
-            
-            st.write("---")
-            st.subheader("📋 Saved Transaction Ledger Feed")
-            st.dataframe(st.session_state.expenses.sort_values(by="date", ascending=False), use_container_width=True)
-        else:
-            st.info("No recorded activity available. Submit the input form to generate records.")
+        if st.button("➕ Add Item to Receipt List", type="secondary", use_container_width=True):
+            if item_name.strip() == "":
+                st.error("Please enter an item name description before adding.")
+            elif item_price <= 0:
+                st.error("Please enter a valid price greater than 0.")
+            else:
+                # Add to the temporary invoice session memory list
+                st.session_state.invoice_items.append({
+                    "date": pd.to_datetime(e_date),
+                    "shop": e_shop,
+                    "items": item_name,
+                    "amount": item_price,
+                    "payment_method": e_method,
+                    "main_category": main_cat,
+                    "sub_category": e_sub_cat
+                })
+                st.toast(f"Added {item_name} to receipt list!")
+                st.rerun()
 
-# --- MODULE 3: PERFECT SPLIT SCREEN OPERATIONS & TASKS ---
+    with col_display:
+        st.subheader("🛒 3. Live Invoice Preview List")
+        
+        if len(st.session_state.invoice_items) > 0:
+            # Convert current invoice items into a visual grid table
+            df_invoice = pd.DataFrame(st.session_state.invoice_items)
+            st.dataframe(df_invoice[["items", "main_category", "sub_category", "amount"]], use_container_width=True)
+            
+            # Running grand total display calculation
+            grand_total = df_invoice["amount"].sum()
+            st.markdown(f"### 🏷️ Running Invoice Total: **NPR {grand_total:,.2f}**")
+            
+            col_b1, col_b2 = st.columns(2)
+            with col_b1:
+                if st.button("💾 SAVE INVOICE ENTRY", type="primary", use_container_width=True):
+                    # Commit temporary invoice items directly into main historical database table
+                    st.session_state.expenses = pd.concat([st.session_state.expenses, df_invoice], ignore_index=True)
+                    st.session_state.invoice_items = [] # Wipe list clean for next time
+                    st.success("Invoice successfully verified, authorized and locked into permanent database!")
+                    st.date_input.value = datetime.today() # Reset layout fields
+                    st.rerun()
+            with col_b2:
+                if st.button("❌ Clear Current Receipt List", type="secondary", use_container_width=True):
+                    st.session_state.invoice_items = []
+                    st.warning("Current running list cleared.")
+                    st.rerun()
+        else:
+            st.info("Your receipt list is currently empty. Enter details on the left side and click 'Add Item to Receipt List' to construct an invoice.")
+            
+    st.write("---")
+    st.subheader("📋 Locked Transaction History Database")
+    if not st.session_state.expenses.empty:
+        # Grouped category analytics visualization
+        c_data = st.session_state.expenses.groupby("main_category")["amount"].sum().reset_index()
+        chart = alt.Chart(c_data).mark_bar(color="#38bdf8", cornerRadiusTopLeft=6, cornerRadiusTopRight=6).encode(
+            x=alt.X("main_category:N", title="Segment"),
+            y=alt.Y("amount:Q", title="Total capital spent (NPR)")
+        ).properties(height=200)
+        st.altair_chart(chart, use_container_width=True)
+        
+        st.dataframe(st.session_state.expenses.sort_values(by="date", ascending=False), use_container_width=True)
+    else:
+        st.caption("No historical invoices stored in permanent memory storage logs yet.")
+
+# --- MODULE 3: OPERATIONS & TASKS ---
 elif active_tab == "🎯 Operations & Tasks":
     st.title("🎯 Operations Engine & Task Pipelines")
     st.write("Track corporate obligations, set client project parameters, and archive secure billing history logs.")
@@ -159,42 +209,3 @@ elif active_tab == "🎯 Operations & Tasks":
         st.write("")
         
         if st.button("Commit Task to Queue", type="primary", use_container_width=True):
-            new_t = pd.DataFrame([{"title": t_title, "deadline": t_deadline, "client": t_client, "address": t_address, "priority": t_priority, "status": "Pending"}])
-            st.session_state.tasks = pd.concat([st.session_state.tasks, new_t], ignore_index=True)
-            st.success("Target workflow successfully deployed.")
-            st.rerun()
-            
-    with col_task_logs:
-        st.subheader("⚡ Live Operations Pipeline Monitor")
-        p_tasks = st.session_state.tasks[st.session_state.tasks["status"] == "Pending"]
-        
-        if not p_tasks.empty:
-            st.dataframe(p_tasks[["title", "priority", "deadline", "client", "address"]], use_container_width=True)
-            
-            task_to_close = st.selectbox("Select Target Objective to Finalize", p_tasks["title"].tolist())
-            if st.button("Execute Close Protocol & Archive", type="secondary", use_container_width=True):
-                target_idx = st.session_state.tasks[st.session_state.tasks["title"] == task_to_close].index
-                st.session_state.tasks.at[target_idx, "status"] = "Done"
-                st.success("Task verified and committed to historical records.")
-                st.rerun()
-        else:
-            st.info("No active operations tracked. Your backlog schedule is clear.")
-            
-        st.write("---")
-        st.subheader("🗄️ Completed Evidence Logs (Read-Only History)")
-        d_tasks = st.session_state.tasks[st.session_state.tasks["status"] == "Done"]
-        if not d_tasks.empty:
-            st.dataframe(d_tasks[["title", "priority", "deadline", "client", "address"]], use_container_width=True)
-        else:
-            st.caption("No historical records archived in the evidence line yet.")
-
-# --- MODULE 4: PREMIUM HEALTH DESIGN (WELLNESS CONSOLE) ---
-elif active_tab == "🩺 Wellness & Health":
-    st.title("🩺 Biometric & Health Monitoring Console")
-    st.write("Track training consistency, check prescription status logs, and monitor consultant schedules.")
-    st.write("")
-    
-    col_h_form, col_h_history = st.columns([1.1, 1.3])
-    with col_h_form:
-        st.subheader("📝 Log Wellness Metrics")
-        h_segment = st.selectbox("Segment Filter", ["Workout Routine Execution", "Prescription / Medicine Log", "Hospital Checkup Consultation"])
