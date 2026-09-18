@@ -4,197 +4,199 @@ import altair as alt
 from datetime import datetime, timedelta
 
 # ==========================================
-# 1. PLATFORM CONFIGURATION & SYSTEM STYLES
+# 1. PREMIUM CORE INITIALIZATION
 # ==========================================
 st.set_page_config(
-    page_title="Mero App", 
+    page_title="Mero App — Premium Management Suite", 
     layout="wide", 
     page_icon="💼",
     initial_sidebar_state="expanded"
 )
 
-# Standardized page padding to push elements safely down below the top menu bar
+# Custom Premium SaaS Styles
 st.markdown("""
 <style>
-    .block-container {
-        max-width: 100% !important;
-        padding-top: 5rem !important;
-        padding-bottom: 2rem !important;
-        padding-left: 3rem !important;
-        padding-right: 3rem !important;
+    @import url('https://googleapis.com');
+    html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
+    
+    .metric-card {
+        background: #1e293b;
+        border: 1px solid #334155;
+        padding: 24px;
+        border-radius: 16px;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        margin-bottom: 20px;
     }
-    .stApp {
-        background-color: #0f172a !important;
+    .metric-val {
+        font-size: 30px;
+        font-weight: 700;
+        color: #38bdf8;
+        margin-top: 8px;
+    }
+    .metric-lbl {
+        font-size: 12px;
+        font-weight: 600;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .main-title {
+        font-size: 36px;
+        font-weight: 800;
+        background: linear-gradient(to right, #38bdf8, #818cf8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Initialize User Database inside local system state
-if "user_db" not in st.session_state:
-    st.session_state.user_db = pd.DataFrame([
-        {"email": "razumaharjan@gmail.com", "password": "admin123", "name": "Raju Maharjan", "role": "Admin"}
-    ])
-
-# Initialize Storage tables with baseline data arrays
+# Initialize Storage Frameworks securely without any nested conditions
 if "expenses" not in st.session_state:
-    st.session_state.expenses = pd.DataFrame(columns=["user", "date", "shop", "items", "amount", "payment_method", "main_category", "sub_category"])
+    st.session_state.expenses = pd.DataFrame(columns=["date", "shop", "items", "amount", "payment_method", "main_category", "sub_category"])
 
 if "tasks" not in st.session_state:
-    st.session_state.tasks = pd.DataFrame(columns=["user", "title", "deadline", "client", "address", "priority", "status"])
+    st.session_state.tasks = pd.DataFrame(columns=["title", "deadline", "client", "address", "priority", "status"])
 
 if "health" not in st.session_state:
-    st.session_state.health = pd.DataFrame(columns=["user", "date", "category", "details"])
+    st.session_state.health = pd.DataFrame(columns=["date", "activity_type", "details"])
 
 if "credit" not in st.session_state:
-    st.session_state.credit = pd.DataFrame(columns=["user", "type", "name", "amount", "due_date", "status"])
+    st.session_state.credit = pd.DataFrame(columns=["type", "person", "amount", "due_date", "status"])
 
 if "invoice_items" not in st.session_state:
     st.session_state.invoice_items = []
 
-if "current_user" not in st.session_state:
-    st.session_state.current_user = None
-if "current_role" not in st.session_state:
-    st.session_state.current_role = None
-if "current_name" not in st.session_state:
-    st.session_state.current_name = None
-
-# Track login/signup screen mode internally without big messy tabs
-if "gate_page" not in st.session_state:
-    st.session_state.gate_page = "login"
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
 
 # ==========================================
-# 2. WORLD-CLASS CENTRAL LOGIN / SIGNUP
+# 2. LOGIN PROCESSOR
 # ==========================================
-if st.session_state.current_user is None:
-    left_space, center_card, right_space = st.columns([1, 1.1, 1])
-    
-    # --- LOGIN MODE SCREEN ---
-    if st.session_state.gate_page == "login":
-        st.markdown('<div style="text-align: center; margin-top: 40px; margin-bottom: 20px;"><p style="font-size: 28px; font-weight: 700; color: #ffffff; letter-spacing: -0.5px; margin-bottom: 8px;">Welcome to Mero App</p><p style="font-size: 14px; color: #94a3b8; margin-bottom: 20px;">Your personal space to plan, track, and manage.</p></div>', unsafe_allow_html=True)
-        
-        with st.form("login_form"):
-            login_email = st.text_input("Email / Gmail Address")
-            login_pass = st.text_input("Password", type="password")
-            st.write("")
-            submit_login = st.form_submit_button("Log in", type="primary", use_container_width=True)
-            
-            if submit_login:
-                db = st.session_state.user_db
-                match = db[(db["email"] == login_email) & (db["password"] == login_pass)]
-                if not match.empty:
-                    st.session_state.current_user = login_email
-                    st.session_state.current_role = match.iloc[0]["role"]
-                    st.session_state.current_name = match.iloc[0]["name"]
-                    st.rerun()
-                else:
-                    st.error("Invalid email address or password sequence.")
-        
-        st.markdown('<div style="margin: 20px 0; color: #64748b; font-size: 12px; text-align: center;">─── OR ───</div>', unsafe_allow_html=True)
-        
-        # Google Authentication Option Button
-        if st.button("🔴 Continue with Google (Gmail)", use_container_width=True):
-            st.session_state.current_user = "razumaharjan@gmail.com"
-            st.session_state.current_role = "Admin"
-            st.session_state.current_name = "Raju Maharjan"
-            st.success("Authenticated instantly via Google!")
-            st.rerun()
-            
+if st.session_state.logged_in == False:
+    st.markdown('<div style="text-align: center; margin-top: 80px;"><p class="main-title">MERO APP</p><p style="color:#64748b;">Premium Personal ERP & Finance Suite</p></div>', unsafe_allow_html=True)
+    col1, col2, col3 = st.columns([1, 1.2, 1])
+    with col2:
+        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+        email = st.text_input("Gmail Address")
+        password = st.text_input("Security Password", type="password")
         st.write("")
-        if st.button("Don't have an account? Sign up", type="secondary", use_container_width=True):
-            st.session_state.gate_page = "signup"
-            st.rerun()
-
-    # --- SIGN UP MODE SCREEN ---
-    elif st.session_state.gate_page == "signup":
-        st.markdown('<div style="text-align: center; margin-top: 40px; margin-bottom: 20px;"><p style="font-size: 28px; font-weight: 700; color: #ffffff; letter-spacing: -0.5px; margin-bottom: 8px;">Create Account</p><p style="font-size: 14px; color: #94a3b8; margin-bottom: 20px;">Register your dashboard profile workspace.</p></div>', unsafe_allow_html=True)
-        
-        with st.form("signup_form"):
-            new_name = st.text_input("Full Name", placeholder="e.g. Sita Maharjan")
-            new_email = st.text_input("Gmail Address")
-            new_pass = st.text_input("Create Password", type="password")
-            st.write("")
-            submit_signup = st.form_submit_button("Sign up", type="primary", use_container_width=True)
-            
-            if submit_signup:
-                if new_name.strip() == "" or new_email.strip() == "" or new_pass.strip() == "":
-                    st.error("All registration fields are required.")
-                elif new_email in st.session_state.user_db["email"].values:
-                    st.error("This email is already registered.")
-                else:
-                    new_row = {"email": new_email, "password": new_pass, "name": new_name, "role": "Member"}
-                    st.session_state.user_db = pd.concat([st.session_state.user_db, pd.DataFrame([new_row])], ignore_index=True)
-                    st.success("Account created successfully!")
-                    st.session_state.gate_page = "login"
-                    st.rerun()
-        
-        st.write("")
-        if st.button("Already have an account? Log in", type="secondary", use_container_width=True):
-            st.session_state.gate_page = "login"
-            st.rerun()
-            
+        if st.button("Authenticate & Log In", type="primary", use_container_width=True):
+            if email == "razumaharjan@gmail.com" and password == "admin123":
+                st.session_state.logged_in = True
+                st.rerun()
+            else:
+                st.error("Invalid security access credentials.")
+        st.markdown('</div>', unsafe_allow_html=True)
     st.stop()
 
 # ==========================================
-# 3. SECURE WORKSPACE HUB (POST-LOGIN)
+# 3. SECURE PREMIUM SYSTEM WORKSPACE
 # ==========================================
-current_user = st.session_state.current_user
-current_role = st.session_state.current_role
-current_name = st.session_state.current_name
+st.sidebar.markdown('<p class="main-title" style="font-size:24px; padding-left:10px;">Mero App</p>', unsafe_allow_html=True)
+st.sidebar.markdown('<div style="padding-left:10px; color:#94a3b8; font-size:14px; margin-bottom:20px;">🛡️ Account: <b>Raju Maharjan</b> (Admin)</div>', unsafe_allow_html=True)
 
-st.sidebar.title("Mero App")
-st.sidebar.markdown(f"🛡️ **{current_name}** ({current_role})")
-st.sidebar.write("---")
+active_tab = st.sidebar.radio("Dashboard Matrix", ["💎 Executive Hub", "💰 Financial Ledger", "🎯 Operations & Tasks", "🩺 Wellness & Health", "💳 Credit Counterparty"])
 
-menu_options = ["💎 Home Overview", "💰 Expense Tracker", "🎯 My To-Do List", "🩺 Health Monitor", "💳 Credit & Payments"]
-if current_role == "Admin":
-    menu_options.append("👑 Family Governance")
-
-active_tab = st.sidebar.radio("Navigation Menu", menu_options)
-
-st.sidebar.write("---")
-if st.sidebar.button("Log Out Account Session", type="secondary", use_container_width=True):
-    st.session_state.current_user = None
-    st.session_state.current_role = None
-    st.session_state.current_name = None
+st.sidebar.write("")
+if st.sidebar.button("Log Out / Terminate", type="secondary", use_container_width=True):
+    st.session_state.logged_in = False
     st.rerun()
 
-# --- MODULE 1: HOME OVERVIEW ---
-if active_tab == "💎 Home Overview":
-    st.title("💎 Summary Overview")
-    st.write(f"Welcome back, {current_name}! Here is the current snapshot of your personal workspace.")
-    st.write("")
-    
-    my_expenses = st.session_state.expenses[st.session_state.expenses["user"] == current_user]
-    my_tasks = st.session_state.tasks[st.session_state.tasks["user"] == current_user]
-    my_credit = st.session_state.credit[st.session_state.credit["user"] == current_user]
+# --- MODULE 1: EXECUTIVE DASHBOARD ---
+if active_tab == "💎 Executive Hub":
+    st.markdown('<p class="main-title">Executive Hub</p>', unsafe_allow_html=True)
+    st.write("Real-time summary analysis of your active modules.")
     
     c1, c2, c3 = st.columns(3)
     with c1:
-        st.metric(label="Your Registered Expenses", value=f"NPR {my_expenses['amount'].sum():,.2f}")
+        total_exp_val = f"NPR {st.session_state.expenses['amount'].sum():,.2f}"
+        st.markdown(f'<div class="metric-card"><div class="metric-lbl">Total Expenses</div><div class="metric-val">{total_exp_val}</div></div>', unsafe_allow_html=True)
     with c2:
-        st.metric(label="Your Active Pending Tasks", value=f"{len(my_tasks[my_tasks['status'] == 'Pending'])} Tasks Left")
+        pending_count = len(st.session_state.tasks[st.session_state.tasks["status"] == "Pending"])
+        st.markdown(f'<div class="metric-card"><div class="metric-lbl">Active Pending Tasks</div><div class="metric-val" style="color:#f43f5e;">{pending_count} Tasks</div></div>', unsafe_allow_html=True)
     with c3:
-        receivables = my_credit[my_credit['type'] == 'Money Lent (People Owe Me)']['amount'].sum()
-        st.metric(label="Your Outstanding Receivables", value=f"NPR {receivables:,.2f}")
+        credit_lent_val = f"NPR {st.session_state.credit[st.session_state.credit['type'] == 'Money Lent (They Owe You)']['amount'].sum():,.2f}"
+        st.markdown(f'<div class="metric-card"><div class="metric-lbl">Outstanding Receivables</div><div class="metric-val" style="color:#10b981;">{credit_lent_val}</div></div>', unsafe_allow_html=True)
 
+# --- MODULE 2: FINANCIAL TRANSACTION LEDGER ---
+if active_tab == "💰 Financial Ledger":
+    st.markdown('<p class="main-title">Financial Transaction Ledger</p>', unsafe_allow_html=True)
+    
+    col_f, col_c = st.columns([1, 1.4])
+    with col_f:
+        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+        e_date = st.date_input("Accounting Date", datetime.today())
+        e_shop = st.text_input("Merchant Entity Name")
+        
+        # FIXED: Upgraded into invoice-style multi-item fields
+        item_name = st.text_input("Item Name / Description", placeholder="e.g. Tea, Petrol, Pack of Coffee")
+        item_price = st.number_input("Item Price Cost (NPR)", min_value=0.0, step=10.0, value=0.0)
+        
+        e_method = st.selectbox("Execution Channel", ["QR Payment", "E-Wallet Transfer", "Cash Settlement", "Bank Cheque"])
+        main_cat = st.selectbox("Primary Category", ["Food & Dining", "Logistics & Transport", "Subscriptions", "Medical/Health", "Groceries"])
+        
+        sub_opts = ["General Item"]
+        if main_cat == "Food & Dining": sub_opts = ["Tea", "Coffee", "Breakfast", "Lunch", "Dinner"]
+        if main_cat == "Logistics & Transport": sub_opts = ["Petrol", "Gas Cylinder", "Indrive Ride", "Pathao Delivery", "Uber", "Public Bus"]
+        if main_cat == "Subscriptions": sub_opts = ["Netflix", "Internet Access", "Software Tools", "Gym Membership"]
+        if main_cat == "Medical/Health": sub_opts = ["Medicine Purchase", "Hospital Checkup", "Doctor Consultation"]
+        if main_cat == "Groceries": sub_opts = ["Kitchen Supplies", "Vegetables", "Fresh Meat", "Toiletries"]
+        
+        e_sub_cat = st.selectbox("Sub-Allocation", sub_opts)
+        
+        # Add single item to current receipt list
+        if st.button("➕ Add Item to Receipt List", use_container_width=True):
+            st.session_state.invoice_items.append({
+                "date": pd.to_datetime(e_date), "shop": e_shop, "items": item_name, "amount": item_price,
+                "payment_method": e_method, "main_category": main_cat, "sub_category": e_sub_cat
+            })
+            st.toast(f"Added {item_name} to item list!")
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+    with col_c:
+        st.markdown('<p class="metric-lbl">🛒 Current Invoice Preview List</p>', unsafe_allow_html=True)
+        df_invoice = pd.DataFrame(st.session_state.invoice_items)
+        st.dataframe(df_invoice, use_container_width=True)
+        
+        if st.button("💾 SAVE INVOICE ENTRY", type="primary", use_container_width=True):
+            if len(df_invoice) > 0:
+                st.session_state.expenses = pd.concat([st.session_state.expenses, df_invoice], ignore_index=True)
+                st.session_state.invoice_items = [] 
+                st.success("Invoice committed safely to your database!")
+                st.rerun()
+                
+        if st.button("❌ Clear List", type="secondary", use_container_width=True):
+            st.session_state.invoice_items = []
+            st.warning("Receipt tracking form cleared.")
+            st.rerun()
+            
     st.write("---")
-    st.subheader("💡 Quick Start Workspace Guide")
-    st.info("**💰 Tracking Expenses & Invoices:** Open the **Expense Tracker** to record daily spending. You can build multi-item lists (like Tea, Coffee, Petrol, or Groceries) on a running receipt preview before saving them permanently.")
-    st.info("**🎯 Managing Tasks & Client Work:** Head over to **My To-Do List** to add active targets, write down client company names, and note project site addresses. Completed entries are securely locked as history evidence.")
-    st.info("**🩺 Health & Wellness Monitoring:** Use the **Health Monitor** tab to record your consistent daily workout routines, medicine prescription logs, and clinic consultation checkup summary updates.")
-    st.info("**💳 Handling Credit & Payments:** Navigate to **Credit & Payments** to document loans or cash balances lent to separate individuals. The database table keeps clean check on target payback due dates.")
+    if len(st.session_state.expenses) > 0:
+        st.markdown('<p class="metric-lbl">📊 Resource Allocation Matrix</p>', unsafe_allow_html=True)
+        c_data = st.session_state.expenses.groupby("main_category")["amount"].sum().reset_index()
+        chart = alt.Chart(c_data).mark_bar(cornerRadiusTopLeft=8, cornerRadiusTopRight=8).encode(
+            x=alt.X("main_category:N", title="Operational Segment"),
+            y=alt.Y("amount:Q", title="Capital (NPR)"),
+            color="main_category:N"
+        ).properties(height=260)
+        st.altair_chart(chart, use_container_width=True)
+        
+        st.subheader("📋 Transaction History Ledger")
+        st.dataframe(st.session_state.expenses, use_container_width=True)
 
-# --- MODULE 2: BULLETPROOF FLAT EXPENSE TRACKER ---
-elif active_tab == "💰 Expense Tracker":
-    st.title("💰 Personal Expense Tracker")
-    st.write("Add items step-by-step to build your bill list below, then click save at the bottom.")
-    st.write("---")
+# --- MODULE 3: REPAIRED WORK SCHEDULER & OPERATIONS ---
+if active_tab == "🎯 Operations & Tasks":
+    st.markdown('<p class="main-title">Operations Engine & To-Do Queue</p>', unsafe_allow_html=True)
+    st.write("Create your task details, specify clients, and archive logs for record evidence.")
+    st.write("")
     
-    st.subheader("🧾 1. Bill Details")
-    e_date = st.date_input("Date Selection", datetime.today())
-    e_shop = st.text_input("Shop / Merchant Name", placeholder="e.g. Bhat-Bhateni")
-    e_method = st.selectbox("Payment Method", ["QR Payment", "E-Wallet (eSewa/Khalti)", "Cash", "Cheque"])
-    
-    st.write("---")
-    st.subheader("➕ 2. Add New Item")
-    item_name = st.text_input("Item Name / Description", placeholder="e.g. Bread, Coffee, Petrol")
+    col_t_form, col_t_display = st.columns([1, 1.4])
+    with col_t_form:
+        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+        t_title = st.text_input("Task Objective Name")
+        t_deadline = st.date_input("Target Deadline", datetime.today() + timedelta(days=1))
+        t_client = st.text_input("Client Corporate Profile Name")
+        t_address = st.text_input("Site Location Address")
+        t_priority = st.selectbox("Priority Urgency Tier", ["Critical", "High", "Medium", "Low"])
+        
