@@ -13,7 +13,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom Premium SaaS Styles
+# Custom Premium SaaS Styles with High-End Fitness Accent Colors
 st.markdown("""
 <style>
     @import url('https://googleapis.com');
@@ -47,6 +47,16 @@ st.markdown("""
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
+    
+    /* Mobile App Kit Layout Simulators */
+    .fitness-plan-card {
+        padding: 16px;
+        border-radius: 12px;
+        color: white;
+        font-weight: 600;
+        margin-bottom: 12px;
+        text-align: center;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -68,6 +78,10 @@ if "invoice_items" not in st.session_state:
 
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
+
+# Persistent health mock tracker parameters for layout consistency
+if "water_cups" not in st.session_state:
+    st.session_state.water_cups = 2
 
 # ==========================================
 # 2. LOGIN PROCESSOR
@@ -128,7 +142,6 @@ if active_tab == "💰 Financial Ledger":
         e_date = st.date_input("Accounting Date", datetime.today())
         e_shop = st.text_input("Merchant Entity Name")
         
-        # FIXED: Upgraded into invoice-style multi-item fields
         item_name = st.text_input("Item Name / Description", placeholder="e.g. Tea, Petrol, Pack of Coffee")
         item_price = st.number_input("Item Price Cost (NPR)", min_value=0.0, step=10.0, value=0.0)
         
@@ -144,7 +157,6 @@ if active_tab == "💰 Financial Ledger":
         
         e_sub_cat = st.selectbox("Sub-Allocation", sub_opts)
         
-        # Add single item to current receipt list
         if st.button("➕ Add Item to Receipt List", use_container_width=True):
             st.session_state.invoice_items.append({
                 "date": pd.to_datetime(e_date), "shop": e_shop, "items": item_name, "amount": item_price,
@@ -185,7 +197,7 @@ if active_tab == "💰 Financial Ledger":
         st.subheader("📋 Transaction History Ledger")
         st.dataframe(st.session_state.expenses, use_container_width=True)
 
-# --- MODULE 3: REPAIRED WORK SCHEDULER & OPERATIONS ---
+# --- MODULE 3: WORK SCHEDULER & OPERATIONS ---
 if active_tab == "🎯 Operations & Tasks":
     st.markdown('<p class="main-title">Operations Engine & To-Do Queue</p>', unsafe_allow_html=True)
     st.write("Create your task details, specify clients, and archive logs for record evidence.")
@@ -195,8 +207,3 @@ if active_tab == "🎯 Operations & Tasks":
     with col_t_form:
         st.markdown('<div class="metric-card">', unsafe_allow_html=True)
         t_title = st.text_input("Task Objective Name")
-        t_deadline = st.date_input("Target Deadline", datetime.today() + timedelta(days=1))
-        t_client = st.text_input("Client Corporate Profile Name")
-        t_address = st.text_input("Site Location Address")
-        t_priority = st.selectbox("Priority Urgency Tier", ["Critical", "High", "Medium", "Low"])
-        
