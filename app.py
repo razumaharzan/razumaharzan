@@ -207,4 +207,3 @@ if active_tab == "🎯 Operations & Tasks":
     with col_t_form:
         st.markdown('<div class="metric-card">', unsafe_allow_html=True)
         t_title = st.text_input("Task Objective Name")
-
