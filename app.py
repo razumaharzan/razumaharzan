@@ -4,7 +4,7 @@ import altair as alt
 from datetime import datetime, timedelta
 
 # ==========================================
-# 1. PLATFORM CONFIGURATION & CORE LAYOUT
+# 1. PLATFORM CONFIGURATION & SYSTEM STYLES
 # ==========================================
 st.set_page_config(
     page_title="Mero App", 
@@ -13,7 +13,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Clean structural padding to ensure elements never slide out of view or hide fields
+# Standardized page padding to push elements safely down below the top menu bar
 st.markdown("""
 <style>
     .block-container {
@@ -35,7 +35,7 @@ if "user_db" not in st.session_state:
         {"email": "razumaharjan@gmail.com", "password": "admin123", "name": "Raju Maharjan", "role": "Admin"}
     ])
 
-# Initialize Storage tables with baseline data rows
+# Initialize Storage tables with baseline data arrays
 if "expenses" not in st.session_state:
     st.session_state.expenses = pd.DataFrame(columns=["user", "date", "shop", "items", "amount", "payment_method", "main_category", "sub_category"])
 
@@ -67,74 +67,71 @@ if "gate_page" not in st.session_state:
 # ==========================================
 if st.session_state.current_user is None:
     left_space, center_card, right_space = st.columns([1, 1.1, 1])
-    with center_card:
-        st.write("") 
-        st.write("")
+    
+    # --- LOGIN MODE SCREEN ---
+    if st.session_state.gate_page == "login":
+        st.markdown('<div style="text-align: center; margin-top: 40px; margin-bottom: 20px;"><p style="font-size: 28px; font-weight: 700; color: #ffffff; letter-spacing: -0.5px; margin-bottom: 8px;">Welcome to Mero App</p><p style="font-size: 14px; color: #94a3b8; margin-bottom: 20px;">Your personal space to plan, track, and manage.</p></div>', unsafe_allow_html=True)
         
-        # --- LOGIN MODE SCREEN ---
-        if st.session_state.gate_page == "login":
-            st.markdown('<div style="text-align: center; margin-top: 40px; margin-bottom: 20px;"><p style="font-size: 28px; font-weight: 700; color: #ffffff; letter-spacing: -0.5px; margin-bottom: 8px;">Welcome to Mero App</p><p style="font-size: 14px; color: #94a3b8; margin-bottom: 20px;">Your personal space to plan, track, and manage.</p></div>', unsafe_allow_html=True)
-            
-            with st.form("login_form"):
-                login_email = st.text_input("Email / Gmail Address")
-                login_pass = st.text_input("Password", type="password")
-                st.write("")
-                submit_login = st.form_submit_button("Log in", type="primary", use_container_width=True)
-                
-                if submit_login:
-                    db = st.session_state.user_db
-                    match = db[(db["email"] == login_email) & (db["password"] == login_pass)]
-                    if not match.empty:
-                        st.session_state.current_user = login_email
-                        st.session_state.current_role = match.iloc[0]["role"]
-                        st.session_state.current_name = match.iloc[0]["name"]
-                        st.rerun()
-                    else:
-                        st.error("Invalid email address or password sequence.")
-            
-            st.markdown('<div style="margin: 20px 0; color: #64748b; font-size: 12px; text-align: center;">─── OR ───</div>', unsafe_allow_html=True)
-            
-            # Google Authentication Option Button
-            if st.button("🔴 Continue with Google (Gmail)", use_container_width=True):
-                st.session_state.current_user = "razumaharjan@gmail.com"
-                st.session_state.current_role = "Admin"
-                st.session_state.current_name = "Raju Maharjan"
-                st.success("Authenticated instantly via Google!")
-                st.rerun()
-                
+        with st.form("login_form"):
+            login_email = st.text_input("Email / Gmail Address")
+            login_pass = st.text_input("Password", type="password")
             st.write("")
-            if st.button("Don't have an account? Sign up", type="secondary", use_container_width=True):
-                st.session_state.gate_page = "signup"
-                st.rerun()
+            submit_login = st.form_submit_button("Log in", type="primary", use_container_width=True)
+            
+            if submit_login:
+                db = st.session_state.user_db
+                match = db[(db["email"] == login_email) & (db["password"] == login_pass)]
+                if not match.empty:
+                    st.session_state.current_user = login_email
+                    st.session_state.current_role = match.iloc[0]["role"]
+                    st.session_state.current_name = match.iloc[0]["name"]
+                    st.rerun()
+                else:
+                    st.error("Invalid email address or password sequence.")
+        
+        st.markdown('<div style="margin: 20px 0; color: #64748b; font-size: 12px; text-align: center;">─── OR ───</div>', unsafe_allow_html=True)
+        
+        # Google Authentication Option Button
+        if st.button("🔴 Continue with Google (Gmail)", use_container_width=True):
+            st.session_state.current_user = "razumaharjan@gmail.com"
+            st.session_state.current_role = "Admin"
+            st.session_state.current_name = "Raju Maharjan"
+            st.success("Authenticated instantly via Google!")
+            st.rerun()
+            
+        st.write("")
+        if st.button("Don't have an account? Sign up", type="secondary", use_container_width=True):
+            st.session_state.gate_page = "signup"
+            st.rerun()
 
-        # --- SIGN UP MODE SCREEN ---
-        elif st.session_state.gate_page == "signup":
-            st.markdown('<div style="text-align: center; margin-top: 40px; margin-bottom: 20px;"><p style="font-size: 28px; font-weight: 700; color: #ffffff; letter-spacing: -0.5px; margin-bottom: 8px;">Create Account</p><p style="font-size: 14px; color: #94a3b8; margin-bottom: 20px;">Register your dashboard profile workspace.</p></div>', unsafe_allow_html=True)
-            
-            with st.form("signup_form"):
-                new_name = st.text_input("Full Name", placeholder="e.g. Sita Maharjan")
-                new_email = st.text_input("Gmail Address")
-                new_pass = st.text_input("Create Password", type="password")
-                st.write("")
-                submit_signup = st.form_submit_button("Sign up", type="primary", use_container_width=True)
-                
-                if submit_signup:
-                    if new_name.strip() == "" or new_email.strip() == "" or new_pass.strip() == "":
-                        st.error("All registration fields are required.")
-                    elif new_email in st.session_state.user_db["email"].values:
-                        st.error("This email is already registered.")
-                    else:
-                        new_row = {"email": new_email, "password": new_pass, "name": new_name, "role": "Member"}
-                        st.session_state.user_db = pd.concat([st.session_state.user_db, pd.DataFrame([new_row])], ignore_index=True)
-                        st.success("Account created successfully!")
-                        st.session_state.gate_page = "login"
-                        st.rerun()
-            
+    # --- SIGN UP MODE SCREEN ---
+    elif st.session_state.gate_page == "signup":
+        st.markdown('<div style="text-align: center; margin-top: 40px; margin-bottom: 20px;"><p style="font-size: 28px; font-weight: 700; color: #ffffff; letter-spacing: -0.5px; margin-bottom: 8px;">Create Account</p><p style="font-size: 14px; color: #94a3b8; margin-bottom: 20px;">Register your dashboard profile workspace.</p></div>', unsafe_allow_html=True)
+        
+        with st.form("signup_form"):
+            new_name = st.text_input("Full Name", placeholder="e.g. Sita Maharjan")
+            new_email = st.text_input("Gmail Address")
+            new_pass = st.text_input("Create Password", type="password")
             st.write("")
-            if st.button("Already have an account? Log in", type="secondary", use_container_width=True):
-                st.session_state.gate_page = "login"
-                st.rerun()
-                
+            submit_signup = st.form_submit_button("Sign up", type="primary", use_container_width=True)
+            
+            if submit_signup:
+                if new_name.strip() == "" or new_email.strip() == "" or new_pass.strip() == "":
+                    st.error("All registration fields are required.")
+                elif new_email in st.session_state.user_db["email"].values:
+                    st.error("This email is already registered.")
+                else:
+                    new_row = {"email": new_email, "password": new_pass, "name": new_name, "role": "Member"}
+                    st.session_state.user_db = pd.concat([st.session_state.user_db, pd.DataFrame([new_row])], ignore_index=True)
+                    st.success("Account created successfully!")
+                    st.session_state.gate_page = "login"
+                    st.rerun()
+        
+        st.write("")
+        if st.button("Already have an account? Log in", type="secondary", use_container_width=True):
+            st.session_state.gate_page = "login"
+            st.rerun()
+            
     st.stop()
 
 # ==========================================
@@ -187,13 +184,17 @@ if active_tab == "💎 Home Overview":
     st.info("**🩺 Health & Wellness Monitoring:** Use the **Health Monitor** tab to record your consistent daily workout routines, medicine prescription logs, and clinic consultation checkup summary updates.")
     st.info("**💳 Handling Credit & Payments:** Navigate to **Credit & Payments** to document loans or cash balances lent to separate individuals. The database table keeps clean check on target payback due dates.")
 
-# --- MODULE 2: RECOVERED COMPOSITE EXPENSE TRACKER ---
+# --- MODULE 2: BULLETPROOF FLAT EXPENSE TRACKER ---
 elif active_tab == "💰 Expense Tracker":
     st.title("💰 Personal Expense Tracker")
-    st.write("Add multiple items to build your bill list below, then click save at the end.")
-    st.write("")
+    st.write("Add items step-by-step to build your bill list below, then click save at the bottom.")
+    st.write("---")
     
-    # Split view that shows forms and history lists together smoothly
-    col_form_side, col_preview_side = st.columns([1.1, 1.3])
+    st.subheader("🧾 1. Bill Details")
+    e_date = st.date_input("Date Selection", datetime.today())
+    e_shop = st.text_input("Shop / Merchant Name", placeholder="e.g. Bhat-Bhateni")
+    e_method = st.selectbox("Payment Method", ["QR Payment", "E-Wallet (eSewa/Khalti)", "Cash", "Cheque"])
     
-    with col_form_side:
+    st.write("---")
+    st.subheader("➕ 2. Add New Item")
+    item_name = st.text_input("Item Name / Description", placeholder="e.g. Bread, Coffee, Petrol")
