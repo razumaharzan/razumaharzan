@@ -13,13 +13,12 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# FIXED: Standardized page margins to ensure headers NEVER get cut off by the top navigation bar
+# Standardized page margins to ensure headers NEVER get cut off by the top navigation bar
 st.markdown("""
 <style>
-    /* Remove background alignment offsets that hide text titles */
     .block-container {
         max-width: 100% !important;
-        padding-top: 5rem !important; /* Added huge top spacing to push text perfectly down into view */
+        padding-top: 6rem !important; /* Pushes the layout safely below the top menu bar */
         padding-bottom: 2rem !important;
         padding-left: 4rem !important;
         padding-right: 4rem !important;
@@ -95,7 +94,7 @@ if st.session_state.current_user is None:
             
             st.markdown('<div style="margin: 20px 0; color: #64748b; font-size: 12px; text-align: center;">─── OR ───</div>', unsafe_allow_html=True)
             
-            # Interactive Continuous Google Authentication Option Button
+            # Google Authentication Option Button
             if st.button("🔴 Continue with Google (Gmail)", use_container_width=True):
                 st.session_state.current_user = "razumaharjan@gmail.com"
                 st.session_state.current_role = "Admin"
@@ -165,14 +164,14 @@ if st.sidebar.button("Log Out Account Session", type="secondary", use_container_
 # --- MODULE 1: HOME OVERVIEW ---
 if active_tab == "💎 Home Overview":
     st.title("💎 Summary Overview")
-    st.write(f"Welcome back, {current_name}! Here is the current financial and operational snapshot of your personal workspace.")
+    st.write(f"Welcome back, {current_name}! Here is the current snapshot of your personal workspace.")
     st.write("")
     
     my_expenses = st.session_state.expenses[st.session_state.expenses["user"] == current_user]
     my_tasks = st.session_state.tasks[st.session_state.tasks["user"] == current_user]
     my_credit = st.session_state.credit[st.session_state.credit["user"] == current_user]
     
-    # Clean top metrics cards layout
+    # Top stats cards
     c1, c2, c3 = st.columns(3)
     with c1:
         st.metric(label="Your Registered Expenses", value=f"NPR {my_expenses['amount'].sum():,.2f}")
@@ -182,27 +181,18 @@ if active_tab == "💎 Home Overview":
         receivables = my_credit[my_credit['type'] == 'Money Lent (People Owe Me)']['amount'].sum()
         st.metric(label="Your Outstanding Receivables", value=f"NPR {receivables:,.2f}")
 
-    # FIXED: Filled the huge empty space right in the center with a premium dashboard guide layout
+    # Filled the empty space using clean, linear text blocks that will never crash
     st.write("---")
     st.subheader("💡 Quick Start Workspace Guide")
     
     col_g1, col_g2 = st.columns(2)
     with col_g1:
-        st.info("""
-        **💰 Tracking Expenses & Invoices**
-        Open the **Expense Tracker** module on the left side menu to log daily expenses. 
-        You can build multi-item store lists (like *Tea, Coffee, Petrol, or Groceries*) 
-        on a running store receipt list before locking them into your database.
-        """)
-        st.info("""
-        **🎯 Managing Deadlines & Client Work**
-        Head over to **My To-Do List** to add active targets, write down client company names, 
-        and note specific project site addresses. Completed entries are safely locked away as evidence for future reference.
-        """)
+        st.info("**💰 Tracking Expenses & Invoices:** Open the **Expense Tracker** to record daily spending. You can build multi-item lists (like Tea, Coffee, Petrol, or Groceries) on a running receipt preview before saving them permanently.")
+        st.info("**🎯 Managing Tasks & Client Work:** Head over to **My To-Do List** to add active targets, write down client company names, and note project site addresses. Completed entries are securely locked as history evidence.")
     with col_g2:
-        st.info("""
-        **🩺 Health & Wellness Monitoring**
-        Use the **Health Monitor** tab to record your consistent daily workout routines, 
-        medicine prescription track logs, and physical clinic consultation summary updates.
-        """)
-        st.info("""
+        st.info("**🩺 Health & Wellness Monitoring:** Use the **Health Monitor** tab to record your consistent daily workout routines, medicine prescription logs, and clinic consultation checkup summary updates.")
+        st.info("**💳 Handling Credit & Payments:** Navigate to **Credit & Payments** to document loans or cash balances lent to separate individuals. The database table keeps clean check on target payback due dates.")
+
+# --- MODULE 2: INVOICE-STYLE EXPENSE TRACKER ---
+elif active_tab == "💰 Expense Tracker":
+    st.title("💰 Personal Expense Tracker")
