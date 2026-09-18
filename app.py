@@ -13,15 +13,15 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Standardized page margins to ensure headers NEVER get cut off by the top navigation bar
+# Clean structural padding to ensure elements never slide out of view or hide fields
 st.markdown("""
 <style>
     .block-container {
         max-width: 100% !important;
-        padding-top: 5rem !important; 
+        padding-top: 5rem !important;
         padding-bottom: 2rem !important;
-        padding-left: 4rem !important;
-        padding-right: 4rem !important;
+        padding-left: 3rem !important;
+        padding-right: 3rem !important;
     }
     .stApp {
         background-color: #0f172a !important;
@@ -187,11 +187,13 @@ if active_tab == "💎 Home Overview":
     st.info("**🩺 Health & Wellness Monitoring:** Use the **Health Monitor** tab to record your consistent daily workout routines, medicine prescription logs, and clinic consultation checkup summary updates.")
     st.info("**💳 Handling Credit & Payments:** Navigate to **Credit & Payments** to document loans or cash balances lent to separate individuals. The database table keeps clean check on target payback due dates.")
 
-# --- MODULE 2: FLAT-DESIGN EXPENSE TRACKER ---
+# --- MODULE 2: RECOVERED COMPOSITE EXPENSE TRACKER ---
 elif active_tab == "💰 Expense Tracker":
     st.title("💰 Personal Expense Tracker")
-    st.write("Add items step-by-step to build your bill list below, then click save at the bottom.")
-    st.write("---")
+    st.write("Add multiple items to build your bill list below, then click save at the end.")
+    st.write("")
     
-    st.subheader("🧾 1. Bill Details")
-    e_date = st.date_input("Date Selection", datetime.today())
+    # Split view that shows forms and history lists together smoothly
+    col_form_side, col_preview_side = st.columns([1.1, 1.3])
+    
+    with col_form_side:
