@@ -18,7 +18,7 @@ st.markdown("""
 <style>
     .block-container {
         max-width: 100% !important;
-        padding-top: 6rem !important; /* Pushes the layout safely below the top menu bar */
+        padding-top: 5rem !important; 
         padding-bottom: 2rem !important;
         padding-left: 4rem !important;
         padding-right: 4rem !important;
@@ -171,7 +171,6 @@ if active_tab == "💎 Home Overview":
     my_tasks = st.session_state.tasks[st.session_state.tasks["user"] == current_user]
     my_credit = st.session_state.credit[st.session_state.credit["user"] == current_user]
     
-    # Top stats cards
     c1, c2, c3 = st.columns(3)
     with c1:
         st.metric(label="Your Registered Expenses", value=f"NPR {my_expenses['amount'].sum():,.2f}")
@@ -181,18 +180,18 @@ if active_tab == "💎 Home Overview":
         receivables = my_credit[my_credit['type'] == 'Money Lent (People Owe Me)']['amount'].sum()
         st.metric(label="Your Outstanding Receivables", value=f"NPR {receivables:,.2f}")
 
-    # Filled the empty space using clean, linear text blocks that will never crash
     st.write("---")
     st.subheader("💡 Quick Start Workspace Guide")
-    
-    col_g1, col_g2 = st.columns(2)
-    with col_g1:
-        st.info("**💰 Tracking Expenses & Invoices:** Open the **Expense Tracker** to record daily spending. You can build multi-item lists (like Tea, Coffee, Petrol, or Groceries) on a running receipt preview before saving them permanently.")
-        st.info("**🎯 Managing Tasks & Client Work:** Head over to **My To-Do List** to add active targets, write down client company names, and note project site addresses. Completed entries are securely locked as history evidence.")
-    with col_g2:
-        st.info("**🩺 Health & Wellness Monitoring:** Use the **Health Monitor** tab to record your consistent daily workout routines, medicine prescription logs, and clinic consultation checkup summary updates.")
-        st.info("**💳 Handling Credit & Payments:** Navigate to **Credit & Payments** to document loans or cash balances lent to separate individuals. The database table keeps clean check on target payback due dates.")
+    st.info("**💰 Tracking Expenses & Invoices:** Open the **Expense Tracker** to record daily spending. You can build multi-item lists (like Tea, Coffee, Petrol, or Groceries) on a running receipt preview before saving them permanently.")
+    st.info("**🎯 Managing Tasks & Client Work:** Head over to **My To-Do List** to add active targets, write down client company names, and note project site addresses. Completed entries are securely locked as history evidence.")
+    st.info("**🩺 Health & Wellness Monitoring:** Use the **Health Monitor** tab to record your consistent daily workout routines, medicine prescription logs, and clinic consultation checkup summary updates.")
+    st.info("**💳 Handling Credit & Payments:** Navigate to **Credit & Payments** to document loans or cash balances lent to separate individuals. The database table keeps clean check on target payback due dates.")
 
-# --- MODULE 2: INVOICE-STYLE EXPENSE TRACKER ---
+# --- MODULE 2: FLAT-DESIGN EXPENSE TRACKER ---
 elif active_tab == "💰 Expense Tracker":
     st.title("💰 Personal Expense Tracker")
+    st.write("Add items step-by-step to build your bill list below, then click save at the bottom.")
+    st.write("---")
+    
+    st.subheader("🧾 1. Bill Details")
+    e_date = st.date_input("Date Selection", datetime.today())
