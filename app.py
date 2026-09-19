@@ -5,7 +5,7 @@ import sqlite3
 from datetime import datetime, date, timedelta
 
 # ==============================================================================
-# 1. DATABASE & AUTOMATIC MIGRATION LAYER (SQLite)
+# 1. PERSISTENCE ENGINE & AUTOMATIC MIGRATION (SQLite)
 # ==============================================================================
 DB_FILE = "mero_app.db"
 
@@ -18,12 +18,12 @@ def init_db():
     with get_db() as conn:
         c = conn.cursor()
         
-        # 1. Unified Transactions Table (Income & Expenses)
+        # Unified Transactions Table (Income & Expenses)
         c.execute("""
             CREATE TABLE IF NOT EXISTS transactions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 date TEXT,
-                type TEXT, -- 'Income' or 'Expense'
+                type TEXT,
                 entity TEXT,
                 description TEXT,
                 amount REAL,
@@ -43,7 +43,7 @@ def init_db():
                     SELECT date, 'Expense', shop, items, amount, main_category, payment_method, sub_category FROM expenses
                 """)
         
-        # 2. Rich Operations & Daily Tasks Table
+        # Operations & Daily Tasks Table
         c.execute("""
             CREATE TABLE IF NOT EXISTS tasks (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -55,17 +55,16 @@ def init_db():
                 created_date TEXT
             )
         """)
-        # Ensure new columns exist on legacy tables
         task_cols = [row[1] for row in c.execute("PRAGMA table_info(tasks)").fetchall()]
         if 'category' not in task_cols:
-            c.execute("ALTER TABLE tasks ADD COLUMN category TEXT DEFAULT 'Work & Career'")
+            c.execute("ALTER TABLE tasks ADD COLUMN category TEXT DEFAULT 'Work & Projects'")
         if 'created_date' not in task_cols:
             c.execute("ALTER TABLE tasks ADD COLUMN created_date TEXT DEFAULT ''")
 
-        # 3. Daily Hydration Table
+        # Daily Hydration Table
         c.execute("CREATE TABLE IF NOT EXISTS daily_water (date TEXT PRIMARY KEY, cups INTEGER)")
         
-        # 4. Exercise Performance Logs
+        # Exercise Performance Logs
         c.execute("""
             CREATE TABLE IF NOT EXISTS exercise_logs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -84,7 +83,7 @@ def init_db():
             )
         """)
         
-        # 5. Challenge Adaptive State & Attempts
+        # Challenge Adaptive State & Attempts
         c.execute("""
             CREATE TABLE IF NOT EXISTS challenge_state (
                 challenge_name TEXT PRIMARY KEY,
@@ -108,7 +107,7 @@ def init_db():
         """)
         for ch in ["30-Day Foundation Challenge", "90-Day Elite Beast Challenge"]:
             c.execute("INSERT OR IGNORE INTO challenge_state (challenge_name, current_day, retries_count) VALUES (?, 1, 0)", (ch,))
-        
+            
         conn.commit()
 
 init_db()
@@ -167,7 +166,7 @@ CHALLENGE_SPECS = {
             {"name": "Explosive Upper Pull", "protocol": "5 Sets × 6 Strict Pull-Ups + 4x8 Archer Rows", "duration": 35, "rest": 90},
             {"name": "Heavy Push & Overhead", "protocol": "5 Sets × 10 Deep Dips + 4x6 Elevated Pike Push-Ups", "duration": 35, "rest": 90},
             {"name": "Core Compression & Lever", "protocol": "5 Sets × 15s L-Sit Hold + 4x8 Hanging Leg Raises", "duration": 30, "rest": 75},
-            {"name": "Pistol & Plyo Leg Engine", "protocol": "4 Sets × 6 Pistol Squats (per leg) + 4x10 Jump Squats", "duration": 35, "rest": 90},
+            {"name": "Pistol & Plyo Leg Engine", "protocol": "4 Sets × 6 Pistol Squats each leg + 4x10 Jump Squats", "duration": 35, "rest": 90},
             {"name": "Skill Crucible (Muscle-Up & HSPU)", "protocol": "5 Sets × 3 Muscle-Up Attempts + 4x5 Wall HSPU", "duration": 40, "rest": 120},
             {"name": "The Century Gauntlet", "protocol": "For Time: 100 Push-ups, 50 Pull-ups, 100 Squats", "duration": 45, "rest": 60},
             {"name": "Deep Recovery & Mobility", "protocol": "30 Mins Hip Openers & Thoracic Mobility", "duration": 30, "rest": 0}
@@ -176,7 +175,7 @@ CHALLENGE_SPECS = {
 }
 
 # ==============================================================================
-# 3. PAGE INITIALIZATION & HIGH-END ATHLETE DARK THEME
+# 3. PAGE CONFIGURATION & STYLING
 # ==============================================================================
 st.set_page_config(page_title="Mero Suite — Executive Operating System", layout="wide", page_icon="⚡")
 
@@ -226,29 +225,25 @@ active_tab = st.sidebar.radio(
 conn = get_db()
 
 # ==============================================================================
-# MODULE 1: 💎 EXECUTIVE DASHBOARD (Shows Panoramic Results Across All Domains)
+# MODULE 1: 💎 EXECUTIVE DASHBOARD
 # ==============================================================================
 if active_tab == "💎 Executive Dashboard":
     st.markdown('<p class="hero-header">Executive Command Cockpit</p>', unsafe_allow_html=True)
     st.markdown('<p class="hero-sub">Consolidated real-time operational status, net cash flow, and fitness telemetry.</p>', unsafe_allow_html=True)
 
-    # 1. Financial KPI Computations
     total_income = conn.execute("SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE type = 'Income'").fetchone()[0]
     total_expense = conn.execute("SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE type = 'Expense'").fetchone()[0]
     net_cashflow = total_income - total_expense
     
-    # 2. Operations & Task Computations
     active_tasks = conn.execute("SELECT COUNT(*) FROM tasks WHERE status != 'Completed'").fetchone()[0]
     urgent_tasks = conn.execute("SELECT COUNT(*) FROM tasks WHERE status != 'Completed' AND priority LIKE '%Urgent%'").fetchone()[0]
     
-    # 3. Health & Fitness Computations
     today_str = str(date.today())
     water_row = conn.execute("SELECT cups FROM daily_water WHERE date = ?", (today_str,)).fetchone()
     water_cups = water_row[0] if water_row else 0
     ch_state = conn.execute("SELECT current_day FROM challenge_state WHERE challenge_name = '30-Day Foundation Challenge'").fetchone()
     current_ch_day = ch_state[0] if ch_state else 1
 
-    # TOP ROW: 4 MASTER KPIS
     k1, k2, k3, k4 = st.columns(4)
     with k1:
         color = "#10b981" if net_cashflow >= 0 else "#f43f5e"
@@ -284,7 +279,6 @@ if active_tab == "💎 Executive Dashboard":
             </div>
         """, unsafe_allow_html=True)
 
-    # SECOND ROW: FINANCIAL & OPERATIONAL STREAMS
     col_f_chart, col_t_preview = st.columns([1.3, 1.2], gap="medium")
     
     with col_f_chart:
@@ -320,7 +314,7 @@ if active_tab == "💎 Executive Dashboard":
                 st.success("🎉 All operational objectives cleared!")
 
 # ==============================================================================
-# MODULE 2: 💰 FINANCE & LEDGER (Full Daily Options, Income & Expense)
+# MODULE 2: 💰 FINANCE & LEDGER
 # ==============================================================================
 elif active_tab == "💰 Finance & Ledger":
     st.markdown('<p class="hero-header">Financial Ledger & Capital Management</p>', unsafe_allow_html=True)
@@ -331,13 +325,11 @@ elif active_tab == "💰 Finance & Ledger":
     with col_entry:
         with st.container(border=True):
             st.markdown("#### ➕ Record Transaction")
-            
             t_type = st.radio("Transaction Type", ["Expense", "Income"], horizontal=True)
 
             with st.form("tx_entry_form", clear_on_submit=True):
                 t_date = st.date_input("Accounting Date", date.today())
                 
-                # Dynamic options tailored for daily life and work
                 if t_type == "Expense":
                     cat_options = [
                         "Food & Groceries", "Dining Out & Cafes", "Rent & Housing", 
@@ -377,43 +369,60 @@ elif active_tab == "💰 Finance & Ledger":
 
     with col_overview:
         with st.container(border=True):
-            st.markdown("#### 📋 Transaction History & Ledger")
-            df_tx = pd.read_sql("SELECT id, date, type, category, entity, description, amount, payment_method FROM transactions ORDER BY id DESC", conn)
-            
-            if not df_tx.empty:
-                # Filter Controls
-                col_f1, col_f2 = st.columns(2)
-                with col_f1:
-                    filter_type = st.selectbox("Filter Type", ["All Transactions", "Expenses Only", "Income Only"])
-                with col_f2:
-                    filter_cat = st.selectbox("Filter Category", ["All Categories"] + sorted(df_tx['category'].unique().tolist()))
-
-                df_filtered = df_tx.copy()
-                if filter_type == "Expenses Only": df_filtered = df_filtered[df_filtered['type'] == 'Expense']
-                elif filter_type == "Income Only": df_filtered = df_filtered[df_filtered['type'] == 'Income']
-                if filter_cat != "All Categories": df_filtered = df_filtered[df_filtered['category'] == filter_cat]
-
-                st.dataframe(df_filtered, use_container_width=True, hide_index=True)
-
-                # Quick Delete
-                with st.expander("🗑️ Delete / Manage Record"):
-                    del_id = st.selectbox("Select Transaction ID to Delete", df_filtered["id"].tolist())
-                    if st.button("Delete Selected Transaction", use_container_width=True):
-                        with conn:
-                            conn.execute("DELETE FROM transactions WHERE id = ?", (del_id,))
-                        st.toast(f"Transaction #{del_id} removed!")
-                        st.rerun()
-
-                csv_data = df_tx.to_csv(index=False).encode('utf-8')
-                st.download_button("📥 Export Full Ledger to CSV", data=csv_data, file_name="mero_financial_ledger.csv", mime="text/csv")
+            st.markdown("#### 📊 Category Expenditure Flow")
+            df_exp_cat = pd.read_sql("SELECT category, SUM(amount) as total FROM transactions WHERE type = 'Expense' GROUP BY category ORDER BY total DESC", conn)
+            if not df_exp_cat.empty:
+                chart_cat = alt.Chart(df_exp_cat).mark_bar(cornerRadiusTopLeft=6, cornerRadiusTopRight=6).encode(
+                    x=alt.X("category:N", sort="-y", title=None),
+                    y=alt.Y("total:Q", title="Spent (NPR)"),
+                    color=alt.Color("category:N", legend=None)
+                ).properties(height=200)
+                st.altair_chart(chart_cat, use_container_width=True)
             else:
-                st.info("Your ledger is currently clean. Add transactions on the left.")
+                st.info("No expense categories to chart yet.")
+
+    st.markdown("---")
+    st.subheader("📋 Master Accounting Journal")
+    df_all_tx = pd.read_sql("SELECT * FROM transactions ORDER BY id DESC", conn)
+    
+    if not df_all_tx.empty:
+        c_filter1, c_filter2 = st.columns([1, 2])
+        with c_filter1:
+            filter_flow = st.selectbox("Filter by Flow", ["All Records", "Expenses Only", "Income Only"])
+        
+        filtered_df = df_all_tx
+        if filter_flow == "Expenses Only":
+            filtered_df = df_all_tx[df_all_tx["type"] == "Expense"]
+        elif filter_flow == "Income Only":
+            filtered_df = df_all_tx[df_all_tx["type"] == "Income"]
+
+        st.dataframe(
+            filtered_df[["id", "date", "type", "entity", "description", "category", "amount", "payment_method", "notes"]],
+            use_container_width=True, 
+            hide_index=True
+        )
+
+        col_del1, col_del2 = st.columns([2, 1])
+        with col_del1:
+            tx_to_delete = st.selectbox("Select ID to Delete", filtered_df["id"].tolist())
+        with col_del2:
+            st.write("")
+            if st.button("🗑️ Delete Selected Transaction", use_container_width=True):
+                with conn:
+                    conn.execute("DELETE FROM transactions WHERE id = ?", (tx_to_delete,))
+                st.success(f"Transaction #{tx_to_delete} removed.")
+                st.rerun()
+
+        csv_file = filtered_df.to_csv(index=False).encode('utf-8')
+        st.download_button("📥 Export Ledger to CSV", data=csv_file, file_name="mero_finance_journal.csv", mime="text/csv")
+    else:
+        st.info("No transactions logged in database yet.")
 
 # ==============================================================================
-# MODULE 3: 🎯 OPERATIONS & TO-DO LISTS (Daily Life, Work, Errands & Matrix)
+# MODULE 3: 🎯 OPERATIONS & TO-DO LISTS
 # ==============================================================================
 elif active_tab == "🎯 Operations & To-Do Lists":
-    st.markdown('<p class="hero-header">Operations Engine & Daily To-Do Lists</p>', unsafe_allow_html=True)
+    st.markdown('<p class="hero-header">Operations Engine & Daily To-Dos</p>', unsafe_allow_html=True)
     st.markdown('<p class="hero-sub">Organize your daily work objectives, personal errands, study sessions, and operational workflows.</p>', unsafe_allow_html=True)
 
     col_t_create, col_t_board = st.columns([1.1, 1.4], gap="medium")
@@ -445,7 +454,7 @@ elif active_tab == "🎯 Operations & To-Do Lists":
                         st.toast(f"Task '{t_title}' queued!", icon="🚀")
                         st.rerun()
                     else:
-                        st.error("Please provide a task title.")
+                        st.error("Please provide a task description.")
 
     with col_t_board:
         with st.container(border=True):
@@ -486,7 +495,7 @@ elif active_tab == "🎯 Operations & To-Do Lists":
                 st.info("No tasks created yet. Schedule your first task on the left.")
 
 # ==============================================================================
-# MODULE 4: 🩺 HEALTH & WELLNESS (All Health, Vitals, Glucose, BP & Hydration)
+# MODULE 4: 🩺 HEALTH & WELLNESS
 # ==============================================================================
 elif active_tab == "🩺 Health & Wellness":
     col_hero, col_chips = st.columns([1.5, 1])
@@ -516,7 +525,11 @@ elif active_tab == "🩺 Health & Wellness":
             </div>
         ''', unsafe_allow_html=True)
         pulse_df = pd.DataFrame({"Time": ["06:00", "09:00", "12:00", "15:00", "18:00", "21:00"], "BPM": [65, 82, 110, 95, 128, 74]})
-        st.altair_chart(alt.Chart(pulse_df).mark_line(color="#38bdf8", strokeWidth=3).encode(x="Time:N", y=alt.Y("BPM:Q", scale=alt.Scale(domain=[50, 140]))).properties(height=110), use_container_width=True)
+        chart_p = alt.Chart(pulse_df).mark_line(color="#38bdf8", strokeWidth=3).encode(
+            x=alt.X("Time:N", title=None),
+            y=alt.Y("BPM:Q", scale=alt.Scale(domain=[50, 140]), title=None)
+        ).properties(height=120)
+        st.altair_chart(chart_p, use_container_width=True)
 
     with c2:
         st.markdown('''
@@ -531,7 +544,12 @@ elif active_tab == "🩺 Health & Wellness":
             "Level": [95, 105, 110, 100, 85, 115, 102],
             "Color": ["#25334d", "#25334d", "#25334d", "#25334d", "#3b82f6", "#25334d", "#25334d"]
         })
-        st.altair_chart(alt.Chart(glucose_df).mark_bar(cornerRadiusTopLeft=6, cornerRadiusTopRight=6).encode(x="Day:N", y="Level:Q", color=alt.Color("Color:N", scale=None)).properties(height=110), use_container_width=True)
+        chart_g = alt.Chart(glucose_df).mark_bar(cornerRadiusTopLeft=6, cornerRadiusTopRight=6).encode(
+            x=alt.X("Day:N", sort=None, title=None),
+            y=alt.Y("Level:Q", title=None),
+            color=alt.Color("Color:N", scale=None)
+        ).properties(height=120)
+        st.altair_chart(chart_g, use_container_width=True)
 
     with c3:
         st.markdown('''
@@ -564,7 +582,7 @@ elif active_tab == "🩺 Health & Wellness":
                         st.rerun()
 
 # ==============================================================================
-# MODULE 5: 🤸 CALISTHENICS & EXERCISES (Codex, Logger, 30/90 Challenges, Videos)
+# MODULE 5: 🤸 CALISTHENICS & EXERCISES
 # ==============================================================================
 elif active_tab == "🤸 Calisthenics & Exercises":
     st.markdown('<p class="hero-header">Calisthenics & Athletic Training Engine</p>', unsafe_allow_html=True)
@@ -576,7 +594,6 @@ elif active_tab == "🤸 Calisthenics & Exercises":
         "📋 Exercise Standards & Free Video Codex"
     ])
 
-    # SUB-TAB 1: DAILY PERFORMANCE LOGGER
     with c_sub1:
         col_l1, col_l2 = st.columns([1.1, 1.4], gap="medium")
         with col_l1:
@@ -628,14 +645,13 @@ elif active_tab == "🤸 Calisthenics & Exercises":
                                     <b style="color:#ffffff;">{r['exercise_name']}</b> {badge}
                                 </div>
                                 <div style="color:#94a3b8; font-size:12px; margin-top:3px;">
-                                    Sets: <b>{r['completed_sets']}/{r['target_sets']}</b> | Reps: <b>{r['completed_reps']}/{r['target_reps']}</b> | Rest: <b>{r['rest_sec']}s</b> | Load: <b>{r['weight_added']}kg</b>
+                                    Sets: <b>{r['completed_sets']}/{r['target_sets']}</b> | Reps: <b>{r['completed_reps']}/{r['target_reps']}</b> | Rest: <b>{r['rest_sec']}s</b> | {r['duration_min']}m
                                 </div>
                             </div>
                         """, unsafe_allow_html=True)
                 else:
                     st.info("No exercise logs recorded yet.")
 
-    # SUB-TAB 2: 30 / 90 DAYS ADAPTIVE CHALLENGES
     with c_sub2:
         selected_ch = st.radio("Choose Track", list(CHALLENGE_SPECS.keys()), horizontal=True)
         spec = CHALLENGE_SPECS[selected_ch]
@@ -711,7 +727,6 @@ elif active_tab == "🤸 Calisthenics & Exercises":
                 else:
                     st.info("No attempts recorded yet for this challenge.")
 
-    # SUB-TAB 3: CODEX & VIDEOS
     with c_sub3:
         st.markdown("#### 🎬 Verified Free Video Codex")
         v_tier = st.selectbox("Filter Tier", ["All Tiers", "Beginner", "Intermediate", "Advanced"])
